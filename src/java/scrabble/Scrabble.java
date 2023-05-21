@@ -17,50 +17,54 @@ public class Scrabble extends PApplet {
 
     private static Dictionary dictionary;
     private static Board board;
+    private static Tile[] rack;
 
     public static Dictionary getDictionary() {
         return dictionary;
     }
 
     public static void main(String[] args) {
-        try {
-            // Connect to the server
-            var socketChannel = SocketChannel.open();
-            socketChannel.connect(new InetSocketAddress(SERVER_HOST, SERVER_PORT));
-            System.out.println("Connected to the server.");
+//        try {
+//            // Connect to the server
+//            var socketChannel = SocketChannel.open();
+//            socketChannel.connect(new InetSocketAddress(SERVER_HOST, SERVER_PORT));
+//            System.out.println("Connected to the server.");
+//
+//            // Read events from the console and send them to the server
+//            var scanner = new Scanner(System.in);
+//            while (true) {
+//                System.out.print("Enter an event to send (or 'quit' to exit): ");
+//                var input = scanner.nextLine();
+//                var bytes = input.getBytes();
+//
+//                if (input.equalsIgnoreCase("quit")) {
+//                    break;
+//                }
+//
+//                // Send the event to the server
+//                var buffer = ByteBuffer.allocate(Integer.BYTES + bytes.length);
+//                buffer.putInt(bytes.length);
+//                buffer.put(bytes);
+//                buffer.flip();
+//                socketChannel.write(buffer);
+//            }
+//
+//            // Close the connection
+//            socketChannel.close();
+//            System.out.println("Connection closed.");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
-            // Read events from the console and send them to the server
-            var scanner = new Scanner(System.in);
-            while (true) {
-                System.out.print("Enter an event to send (or 'quit' to exit): ");
-                String input = scanner.nextLine();
-
-                if (input.equalsIgnoreCase("quit")) {
-                    break;
-                }
-
-                // Send the event to the server
-                var buffer = ByteBuffer.wrap(input.getBytes());
-                socketChannel.write(buffer);
-
-                // Clear the buffer for the next event
-                buffer.clear();
-            }
-
-            // Close the connection
-            socketChannel.close();
-            System.out.println("Connection closed.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-//        PApplet.main(Scrabble.class.getName(), args);
+        PApplet.main(Scrabble.class.getName(), args);
     }
 
     @Override
     public void settings() {
         size(WINDOW_WIDTH, WINDOW_HEIGHT);
-        pixelDensity(displayDensity());
+        var displayDensity = displayDensity();
+        pixelDensity(displayDensity);
+        System.out.println("Display Density: " + displayDensity);
     }
 
     @Override
@@ -72,9 +76,13 @@ public class Scrabble extends PApplet {
             dictionary = Dictionary.loadFromFile("/dictionary.txt");
         } catch(IOException e) {
             e.printStackTrace();
-            System.out.println("Couldn't load dictionary. Exiting!");
+            System.out.println("Failed to load dictionary. Exiting!");
             System.exit(1);
         }
+
+        System.out.println("Loaded dictionary with " + dictionary.size() + " words");
+
+        board.checkWordPlacement().forEach(placement -> System.out.println(placement.isValid + " " + placement.pointValue + " " + placement.invalidReason));
     }
 
     @Override

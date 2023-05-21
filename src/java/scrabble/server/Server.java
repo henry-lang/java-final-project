@@ -18,6 +18,8 @@ public class Server {
     private static final HashMap<SocketChannel, ClientInfo> clients = new HashMap<>();
     private static final Random random = new Random();
 
+    private static final ByteBuffer lengthBuffer = ByteBuffer.allocate(Integer.BYTES);
+
     public static String generateGameID() {
         while(true) {
             var chars = new char[GAME_ID_LENGTH];
@@ -90,24 +92,32 @@ public class Server {
     }
 
     private static void readFromClient(SocketChannel clientChannel) throws IOException {
-        var buffer = ByteBuffer.allocate(1024);
-        var bytesRead = clientChannel.read(buffer);
+        System.out.println("Reading message...");
+        lengthBuffer.clear();
+        var bytesRead = clientChannel.read(lengthBuffer);
 
         if (bytesRead == -1) {
             // Connection closed by client
             clientChannel.close();
             System.out.println("Client disconnected: " + clientChannel.getRemoteAddress());
+            return;
         }
 
-        buffer.flip();
-        var data = new byte[buffer.limit()];
-        buffer.get(data);
+        if (lengthBuffer.position() == Integer.BYTES) {
+            lengthBuffer.flip();
+            var messageSize = lengthBuffer.getInt();
 
-        var message = new String(data);
+            // TODO: Maybe ensure that messageSize is less than a certain value
+            var buffer = ByteBuffer.allocate(messageSize);
+            clientChannel.read(buffer);
+            System.out.println(new String(buffer.array()));
+        }
 
-        System.out.println("Received from client " + clientChannel.getRemoteAddress() + ": " + message);
+//        var message = new String(data);
+
+//        System.out.println("Received from client " + clientChannel.getRemoteAddress() + ": " + message);
 
         // Echo the message back to the client
-        clientChannel.write(ByteBuffer.wrap(data));
+//        clientChannel.write(ByteBuffer.wrap(data));
     }
 }

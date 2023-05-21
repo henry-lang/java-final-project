@@ -26,4 +26,7 @@ public class Dictionary {
     public boolean contains(String word) {
         return words.contains(word);
     }
+    public int size() {
+        return words.size();
+    }
 }

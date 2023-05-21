@@ -6,7 +6,7 @@ public class Tile {
     private final boolean isBlank;
 
     // Whether this tile is incorporated onto the board or is temporarily placed down
-    private boolean isPlacedDown = false;
+    private boolean isFinalized = false;
 
     public Tile(char letter, int value, boolean isBlank) {
         this.letter = letter;
@@ -20,8 +20,8 @@ public class Tile {
         this.isBlank = isBlank;
     }
 
-    public void placeDown() {
-        isPlacedDown = true;
+    public void makeFinalized() {
+        isFinalized = true;
     }
 
     public int getValue() {
@@ -36,7 +36,7 @@ public class Tile {
         return letter;
     }
 
-    public boolean isPlacedDown() {
-        return isPlacedDown;
+    public boolean isFinalized() {
+        return isFinalized;
     }
 }
