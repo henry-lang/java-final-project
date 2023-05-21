@@ -48,10 +48,48 @@ public class Board {
                     graphics.fill(color.r, color.g, color.b);
                     graphics.rect(i * BOARD_SPACING + TILE_GAPS / 2, j * BOARD_SPACING + TILE_GAPS / 2, TILE_SIZE, TILE_SIZE, TILE_RADIUS);
                     if(multiplier != NONE && multiplier != ORIGIN) {
-                        graphics.text(multiplier.name(), i * BOARD_SPACING + TILE_GAPS / 2, j * BOARD_SPACING + TILE_GAPS / 2);
+                        graphics.textSize(TILE_SIZE * 0.7f);
+                        graphics.textAlign(graphics.CENTER);
+                        graphics.fill(240);
+                        graphics.text(multiplier.name(), i * BOARD_SPACING + TILE_GAPS / 2 + TILE_SIZE / 2, j * BOARD_SPACING + TILE_GAPS / 2 + TILE_SIZE * 0.7f);
                     }
                 } else {
+                    // Get status of neighboring cells
+                    var up = i > 0 && tiles[i - 1][j] != null;
+                    var down = i < SIZE - 1 && tiles[i + 1][j] != null;
+                    var left = j > 0 && tiles[i][j - 1] != null;
+                    var right = j < SIZE - 1 && tiles[i][j + 1] != null;
 
+                    var tl = !up && !left ? TILE_RADIUS : 0;
+                    var tr = !up && !right ? TILE_RADIUS : 0;
+                    var bl = !down && !left ? TILE_RADIUS : 0;
+                    var br = !down && !right ? TILE_RADIUS : 0;
+
+                    var x = j * BOARD_SPACING + TILE_GAPS / 2;
+                    var y = i * BOARD_SPACING + TILE_GAPS / 2;
+                    var w = TILE_SIZE;
+                    var h = TILE_SIZE;
+
+                    if(left) {
+                        x -= TILE_GAPS;
+                        w += TILE_GAPS;
+                    }
+
+                    if(right) {
+                        w += TILE_GAPS;
+                    }
+
+                    if(up) {
+                        y -= TILE_GAPS;
+                        h += TILE_GAPS;
+                    }
+
+                    if(down) {
+                        h += TILE_GAPS;
+                    }
+
+                    graphics.fill(255, 255, 0);
+                    graphics.rect(x, y, w, h, tl, tr, br, bl);
                 }
             }
         }
