@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 public class Scrabble extends PApplet {
     public static final int WINDOW_WIDTH = 500;

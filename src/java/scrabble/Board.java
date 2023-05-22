@@ -43,9 +43,9 @@ public class Board {
 //        tiles[1][2] = new Tile('a', 1, false);
 //        tiles[1][4] = new Tile('t', 2, false);
 
-        tiles[1][1] = new Tile('c', 3, false);
-        tiles[2][1] = new Tile('a', 1, false);
-        tiles[3][1] = new Tile('t', 2, false);
+        tiles[CENTER - 1][CENTER] = new Tile('c', 3, false);
+        tiles[CENTER][CENTER] = new Tile('a', 1, false);
+        tiles[CENTER + 1][CENTER] = new Tile('o', 2, false);
     }
 
     private boolean isFirstMove() {
@@ -187,7 +187,7 @@ public class Board {
 
             var pointValue = 0;
             var wordMultiplier = 1;
-            var word = new StringBuilder();
+            var wordBuilder = new StringBuilder();
             for(var row = startRow; row <= endRow; row++) {
                 var tile = tiles[row][col];
                 var tileMultiplier = 1;
@@ -212,11 +212,17 @@ public class Board {
                     }
                 }
                 pointValue += tile.getValue() * tileMultiplier;
-                word.append(tiles[row][col].getLetter());
+                wordBuilder.append(tiles[row][col].getLetter());
             }
 
             pointValue *= wordMultiplier;
-            words.add(new WordPlacement(word.toString(), pointValue));
+
+            var word = wordBuilder.toString();
+            if(!Scrabble.getDictionary().contains(word)) {
+                return WordPlacementInfo.invalidWord(word);
+            }
+
+            words.add(new WordPlacement(word, pointValue));
         }
 
         System.out.println(lineInfo.horizontal + " " + lineInfo.startRow + " " + lineInfo.startCol + " " + lineInfo.endRow + " " + lineInfo.endCol);
@@ -253,10 +259,10 @@ public class Board {
                     }
                 } else {
                     // Get status of neighboring cells
-                    var up = i > 0 && tiles[i - 1][j] != null;
-                    var down = i < SIZE - 1 && tiles[i + 1][j] != null;
-                    var left = j > 0 && tiles[i][j - 1] != null;
-                    var right = j < SIZE - 1 && tiles[i][j + 1] != null;
+                    var up = i > 0 && tiles[i - 1][j] != null && tiles[i - 1][j].isFinalized();
+                    var down = i < SIZE - 1 && tiles[i + 1][j] != null && tiles[i + 1][j].isFinalized();
+                    var left = j > 0 && tiles[i][j - 1] != null && tiles[i][j - 1].isFinalized();
+                    var right = j < SIZE - 1 && tiles[i][j + 1] != null && tiles[i][j + 1].isFinalized();
 
                     var tl = !up && !left ? TILE_RADIUS : 0;
                     var tr = !up && !right ? TILE_RADIUS : 0;

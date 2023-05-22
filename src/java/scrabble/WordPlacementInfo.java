@@ -25,4 +25,8 @@ public class WordPlacementInfo {
     public static WordPlacementInfo invalid(String invalidReason) {
         return new WordPlacementInfo(false, invalidReason, null);
     }
+
+    public static WordPlacementInfo invalidWord(String word) {
+        return WordPlacementInfo.invalid("Invalid word: " + word);
+    }
 }
