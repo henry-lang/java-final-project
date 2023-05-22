@@ -236,14 +236,20 @@ public class Board {
                 var multiplier = multipliers[i][j];
                 var color = multiplier.getColor();
 
+                var x = j * BOARD_SPACING + TILE_GAPS / 2;
+                var y = i * BOARD_SPACING + TILE_GAPS / 2;
+                var textX = x + TILE_SIZE / 2;
+                var textY = y + TILE_SIZE * 0.7f;
+
+                graphics.textSize(TILE_SIZE * 0.7f);
+                graphics.textAlign(graphics.CENTER);
+
                 if(tile == null) {
                     graphics.fill(color.r, color.g, color.b);
-                    graphics.rect(i * BOARD_SPACING + TILE_GAPS / 2, j * BOARD_SPACING + TILE_GAPS / 2, TILE_SIZE, TILE_SIZE, TILE_RADIUS);
+                    graphics.rect(x, y, TILE_SIZE, TILE_SIZE, TILE_RADIUS);
                     if(multiplier != NONE && multiplier != ORIGIN) {
-                        graphics.textSize(TILE_SIZE * 0.7f);
-                        graphics.textAlign(graphics.CENTER);
                         graphics.fill(240);
-                        graphics.text(multiplier.name(), i * BOARD_SPACING + TILE_GAPS / 2 + TILE_SIZE / 2, j * BOARD_SPACING + TILE_GAPS / 2 + TILE_SIZE * 0.7f);
+                        graphics.text(multiplier.name(), textX, textY);
                     }
                 } else {
                     // Get status of neighboring cells
@@ -257,8 +263,6 @@ public class Board {
                     var bl = !down && !left ? TILE_RADIUS : 0;
                     var br = !down && !right ? TILE_RADIUS : 0;
 
-                    var x = j * BOARD_SPACING + TILE_GAPS / 2;
-                    var y = i * BOARD_SPACING + TILE_GAPS / 2;
                     var w = TILE_SIZE;
                     var h = TILE_SIZE;
 
@@ -280,8 +284,11 @@ public class Board {
                         h += TILE_GAPS;
                     }
 
-                    graphics.fill(255, 255, 0);
+                    // TODO: don't hardcode this
+                    graphics.fill(242, 173, 26);
                     graphics.rect(x, y, w, h, tl, tr, br, bl);
+                    graphics.fill(0);
+                    graphics.text(Character.toUpperCase(tile.getLetter()), textX, textY);
                 }
             }
         }
