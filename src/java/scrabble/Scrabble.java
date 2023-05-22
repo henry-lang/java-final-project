@@ -82,7 +82,12 @@ public class Scrabble extends PApplet {
 
         System.out.println("Loaded dictionary with " + dictionary.size() + " words");
 
-        board.checkWordPlacement().forEach(placement -> System.out.println(placement.isValid + " " + placement.pointValue + " " + placement.invalidReason));
+        var placement = board.checkWordPlacement();
+        if(placement.isValid) {
+            placement.words.forEach(p -> System.out.println(p.pointValue + " " + p.word));
+        } else {
+            System.out.println(placement.invalidReason);
+        }
     }
 
     @Override

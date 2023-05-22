@@ -10,6 +10,7 @@ import static scrabble.Multiplier.*;
 
 public class Board {
     public static final int SIZE = 15;
+    public static final int CENTER = SIZE / 2;
     public static final float BOARD_SPACING = ((float) Scrabble.WINDOW_WIDTH) / SIZE;
     public static final float TILE_SIZE = BOARD_SPACING * 0.85f;
     public static final float TILE_GAPS = BOARD_SPACING - TILE_SIZE;
@@ -47,6 +48,10 @@ public class Board {
         tiles[3][1] = new Tile('t', 2, false);
     }
 
+    private boolean isFirstMove() {
+        return tiles[CENTER][CENTER] == null;
+    }
+
     private boolean anyTilesPlaced() {
         var isPlaced = false;
         outer:
@@ -79,6 +84,12 @@ public class Board {
             this.startCol = startCol;
             this.endRow = endRow;
             this.endCol = endCol;
+        }
+
+        public boolean intersects(int row, int col) {
+            return horizontal
+                ? (row == 0 && col >= startCol && col <= endCol)
+                : (col == 0 && row >= startRow && row <= endRow);
         }
     }
 
@@ -135,25 +146,26 @@ public class Board {
         return false;
     }
 
-    public List<WordPlacementInfo> checkWordPlacement() {
-        var wordPlacements = new ArrayList<WordPlacementInfo>();
+    public WordPlacementInfo checkWordPlacement() {
 
         if(!anyTilesPlaced()) {
-            wordPlacements.add(WordPlacementInfo.INVALID_NO_TILES);
-            return wordPlacements;
+            return WordPlacementInfo.INVALID_NO_TILES;
         }
 
         var lineInfo = tilesInStraightLine();
         if(!lineInfo.inStraightLine) {
-            wordPlacements.add(WordPlacementInfo.INVALID_STRAIGHT_LINE);
-            return wordPlacements;
+            return WordPlacementInfo.INVALID_STRAIGHT_LINE;
         }
 
         if(checkForGapsInLine(lineInfo)) {
-            wordPlacements.add(WordPlacementInfo.INVALID_GAP_IN_LINE);
-            return wordPlacements;
+            return WordPlacementInfo.INVALID_GAP_IN_LINE;
         }
 
+        if(isFirstMove() && !lineInfo.intersects(CENTER, CENTER)) {
+            return WordPlacementInfo.INVALID_CENTER_SQUARE;
+        }
+
+        var words = new ArrayList<WordPlacement>();
         if(lineInfo.horizontal) {
             var col = lineInfo.startCol;
             while(col > 0 && tiles[lineInfo.startRow][col] != null) {
@@ -204,13 +216,13 @@ public class Board {
             }
 
             pointValue *= wordMultiplier;
-            wordPlacements.add(new WordPlacementInfo(true, pointValue, word.toString()));
+            words.add(new WordPlacement(word.toString(), pointValue));
         }
 
         System.out.println(lineInfo.horizontal + " " + lineInfo.startRow + " " + lineInfo.startCol + " " + lineInfo.endRow + " " + lineInfo.endCol);
 
-        wordPlacements.sort(Comparator.comparingInt(a -> a.pointValue));
-        return wordPlacements;
+        words.sort(Comparator.comparingInt(word -> word.pointValue));
+        return WordPlacementInfo.valid(words);
     }
 
     public void draw(PGraphics graphics) {
