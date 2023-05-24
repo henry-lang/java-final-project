@@ -8,7 +8,9 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Random;
+import java.util.Set;
 
 public class Server {
     private static final int PORT = 8080;
@@ -38,9 +40,9 @@ public class Server {
 
     public static void main(String[] args) {
         try {
-            var selector = Selector.open();
+            Selector selector = Selector.open();
 
-            var serverSocketChannel = ServerSocketChannel.open();
+            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
             serverSocketChannel.socket().bind(new InetSocketAddress(PORT));
             serverSocketChannel.configureBlocking(false);
 
@@ -48,21 +50,21 @@ public class Server {
             System.out.println("Server started on port " + PORT);
 
             while(true) {
-                var readyChannels = selector.select();
+                int readyChannels = selector.select();
 
                 if(readyChannels == 0) {
                     continue;
                 }
 
-                var selectedKeys = selector.selectedKeys();
-                var keyIterator = selectedKeys.iterator();
+                Set<SelectionKey> selectedKeys = selector.selectedKeys();
+                Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
 
                 while(keyIterator.hasNext()) {
-                    var key = keyIterator.next();
+                    SelectionKey key = keyIterator.next();
 
                     if(key.isAcceptable()) {
-                        var serverChannel = (ServerSocketChannel) key.channel();
-                        var clientChannel = serverChannel.accept();
+                        ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
+                        SocketChannel clientChannel = serverChannel.accept();
                         clientChannel.configureBlocking(false);
                         clientChannel.register(selector, SelectionKey.OP_READ);
 
@@ -73,7 +75,7 @@ public class Server {
 
                     if(key.isReadable()) {
                         try {
-                            var clientChannel = (SocketChannel) key.channel();
+                            SocketChannel clientChannel = (SocketChannel) key.channel();
                             readFromClient(clientChannel);
                         } catch(IOException e) {
                             System.out.println("Client disconnected");
@@ -94,7 +96,7 @@ public class Server {
     private static void readFromClient(SocketChannel clientChannel) throws IOException {
         System.out.println("Reading message...");
         lengthBuffer.clear();
-        var bytesRead = clientChannel.read(lengthBuffer);
+        int bytesRead = clientChannel.read(lengthBuffer);
 
         if (bytesRead == -1) {
             // Connection closed by client
@@ -105,10 +107,10 @@ public class Server {
 
         if (lengthBuffer.position() == Integer.BYTES) {
             lengthBuffer.flip();
-            var messageSize = lengthBuffer.getInt();
+            int messageSize = lengthBuffer.getInt();
 
             // TODO: Maybe ensure that messageSize is less than a certain value
-            var buffer = ByteBuffer.allocate(messageSize);
+            ByteBuffer buffer = ByteBuffer.allocate(messageSize);
             clientChannel.read(buffer);
             System.out.println(new String(buffer.array()));
         }

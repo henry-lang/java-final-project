@@ -2,8 +2,6 @@ package scrabble;
 
 import processing.core.PGraphics;
 
-import static scrabble.Board.CENTER;
-
 public class TileRack {
     private final int TILE_WIDTH = 45;
     private final int TILE_GAP = 10;
@@ -15,6 +13,11 @@ public class TileRack {
         // to be removed later
         for (int i = 0; i < 7; i++) add(new Tile('a', 1, false));
     }
+
+    public void startDragging() {
+
+    }
+
 
     public void add(Tile newTile) {
         for (int i = 0; i < tiles.length; i++) {

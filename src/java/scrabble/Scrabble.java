@@ -3,7 +3,11 @@ package scrabble;
 import processing.core.PApplet;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.Random;
+import java.util.Scanner;
 
 public class Scrabble extends PApplet {
     public static final int WINDOW_WIDTH = 500;
@@ -26,38 +30,38 @@ public class Scrabble extends PApplet {
     }
 
     public static void main(String[] args) {
-//        try {
-//            // Connect to the server
-//            var socketChannel = SocketChannel.open();
-//            socketChannel.connect(new InetSocketAddress(SERVER_HOST, SERVER_PORT));
-//            System.out.println("Connected to the server.");
-//
-//            // Read events from the console and send them to the server
-//            var scanner = new Scanner(System.in);
-//            while (true) {
-//                System.out.print("Enter an event to send (or 'quit' to exit): ");
-//                var input = scanner.nextLine();
-//                var bytes = input.getBytes();
-//
-//                if (input.equalsIgnoreCase("quit")) {
-//                    break;
-//                }
-//
-//                // Send the event to the server
-//                var buffer = ByteBuffer.allocate(Integer.BYTES + bytes.length);
-//                buffer.putInt(bytes.length);
-//                buffer.put(bytes);
-//                buffer.flip();
-//                socketChannel.write(buffer);
-//            }
-//
-//            // Close the connection
-//            socketChannel.close();
-//            System.out.println("Connection closed.");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-        PApplet.main(Scrabble.class.getName(), args);
+        try {
+            // Connect to the server
+            var socketChannel = SocketChannel.open();
+            socketChannel.connect(new InetSocketAddress(SERVER_HOST, SERVER_PORT));
+            System.out.println("Connected to the server.");
+
+            // Read events from the console and send them to the server
+            var scanner = new Scanner(System.in);
+            while (true) {
+                System.out.print("Enter an event to send (or 'quit' to exit): ");
+                var input = scanner.nextLine();
+                var bytes = input.getBytes();
+
+                if (input.equalsIgnoreCase("quit")) {
+                    break;
+                }
+
+                // Send the event to the server
+                var buffer = ByteBuffer.allocate(Integer.BYTES + bytes.length);
+                buffer.putInt(bytes.length);
+                buffer.put(bytes);
+                buffer.flip();
+                socketChannel.write(buffer);
+            }
+
+            // Close the connection
+            socketChannel.close();
+            System.out.println("Connection closed.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        PApplet.main(Scrabble.class.getName(), args);
     }
 
     @Override
