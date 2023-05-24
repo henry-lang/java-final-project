@@ -3,6 +3,7 @@ package scrabble;
 import processing.core.PApplet;
 
 import java.io.IOException;
+import java.util.Random;
 
 public class Scrabble extends PApplet {
     public static final int WINDOW_WIDTH = 500;
@@ -11,9 +12,14 @@ public class Scrabble extends PApplet {
     private static final String SERVER_HOST = "localhost";
     private static final int SERVER_PORT = 8080;
 
+    private static Random random;
     private static Dictionary dictionary;
     private static Board board;
     private static TileRack rack;
+
+    public static Random getRandom() {
+        return random;
+    }
 
     public static Dictionary getDictionary() {
         return dictionary;
@@ -57,13 +63,16 @@ public class Scrabble extends PApplet {
     @Override
     public void settings() {
         size(WINDOW_WIDTH, WINDOW_HEIGHT);
-        var displayDensity = displayDensity();
+        int displayDensity = displayDensity();
         pixelDensity(displayDensity);
         System.out.println("Display Density: " + displayDensity);
     }
 
     @Override
     public void setup() {
+        windowTitle("Phrases with Phriends");
+
+        random = new Random();
         board = new Board();
         rack = new TileRack();
 
@@ -78,7 +87,7 @@ public class Scrabble extends PApplet {
 
         System.out.println("Loaded dictionary with " + dictionary.size() + " words");
 
-        var placement = board.checkWordPlacement();
+        WordPlacementInfo placement = board.checkWordPlacement();
         if(placement.isValid) {
             placement.words.forEach(p -> System.out.println(p.pointValue + " " + p.word));
         } else {

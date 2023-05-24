@@ -11,10 +11,10 @@ public class Dictionary {
     private final HashSet<String> words = new HashSet<>();
 
     public static Dictionary loadFromFile(String resourceName) throws IOException {
-        var dictionary = new Dictionary();
+        Dictionary dictionary = new Dictionary();
 
-        var br = new BufferedReader(new InputStreamReader(Objects.requireNonNull(Dictionary.class.getResourceAsStream(resourceName))));
-        var word = br.readLine();
+        BufferedReader br = new BufferedReader(new InputStreamReader(Objects.requireNonNull(Dictionary.class.getResourceAsStream(resourceName))));
+        String word = br.readLine();
         while (word != null) {
             dictionary.words.add(word);
             word = br.readLine();

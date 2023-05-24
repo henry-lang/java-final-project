@@ -54,10 +54,10 @@ public class Board {
     }
 
     private boolean anyTilesPlaced() {
-        var isPlaced = false;
+        boolean isPlaced = false;
         outer:
-        for (var row : tiles) {
-            for (var tile : row) {
+        for (Tile[] row : tiles) {
+            for (Tile tile : row) {
                 if (tile != null && !tile.isFinalized()) {
                     isPlaced = true;
                     break outer;
@@ -95,14 +95,14 @@ public class Board {
     }
 
     private TileLineInfo tilesInStraightLine() {
-        var startRow = -1;
-        var startCol = -1;
-        var lastRow = -1;
-        var lastCol = -1;
-        var decidedDirection = false;
-        var horizontal = false; // Only useful when decidedDirection is true
-        for(var r = 0; r < SIZE; r++) {
-            for(var c = 0; c < SIZE; c++) {
+        int startRow = -1;
+        int startCol = -1;
+        int lastRow = -1;
+        int lastCol = -1;
+        boolean decidedDirection = false;
+        boolean horizontal = false; // Only useful when decidedDirection is true
+        for(int r = 0; r < SIZE; r++) {
+            for(int c = 0; c < SIZE; c++) {
                 if(tiles[r][c] != null && !tiles[r][c].isFinalized()) {
                     if(lastRow != -1 && lastCol != -1) {
                         if(decidedDirection) {
@@ -136,8 +136,8 @@ public class Board {
     }
 
     private boolean checkForGapsInLine(TileLineInfo lineInfo) {
-        for(var r = lineInfo.startRow; r <= lineInfo.endRow; r++) {
-            for(var c = lineInfo.startCol; c <= lineInfo.endCol; c++) {
+        for(int r = lineInfo.startRow; r <= lineInfo.endRow; r++) {
+            for(int c = lineInfo.startCol; c <= lineInfo.endCol; c++) {
                 if(tiles[r][c] == null) {
                     // There is a gap!
                     return true;
@@ -153,7 +153,7 @@ public class Board {
             return WordPlacementInfo.INVALID_NO_TILES;
         }
 
-        var lineInfo = tilesInStraightLine();
+        TileLineInfo lineInfo = tilesInStraightLine();
         if(!lineInfo.inStraightLine) {
             return WordPlacementInfo.INVALID_STRAIGHT_LINE;
         }
@@ -166,34 +166,34 @@ public class Board {
             return WordPlacementInfo.INVALID_CENTER_SQUARE;
         }
 
-        var words = new ArrayList<WordPlacement>();
+        ArrayList<WordPlacement> words = new ArrayList<>();
         if(lineInfo.horizontal) {
-            var col = lineInfo.startCol;
+            int col = lineInfo.startCol;
             while(col > 0 && tiles[lineInfo.startRow][col] != null) {
                 col -= 1;
             }
         } else {
-            var col = lineInfo.startCol;
+            int col = lineInfo.startCol;
 
             // Extend the line if there are tiles after or before the line
-            var startRow = lineInfo.startRow;
+            int startRow = lineInfo.startRow;
             while(startRow > 0 && tiles[startRow - 1][col] != null) {
                 startRow -= 1;
             }
 
-            var endRow = lineInfo.endRow;
+            int endRow = lineInfo.endRow;
             while(endRow < SIZE - 1 && tiles[endRow + 1][col] != null) {
                 endRow += 1;
             }
 
-            var pointValue = 0;
-            var wordMultiplier = 1;
-            var wordBuilder = new StringBuilder();
-            for(var row = startRow; row <= endRow; row++) {
-                var tile = tiles[row][col];
-                var tileMultiplier = 1;
+            int pointValue = 0;
+            int wordMultiplier = 1;
+            StringBuilder wordBuilder = new StringBuilder();
+            for(int row = startRow; row <= endRow; row++) {
+                Tile tile = tiles[row][col];
+                int tileMultiplier = 1;
                 if(!tile.isFinalized()) {
-                    var multiplier = multipliers[row][col];
+                    Multiplier multiplier = multipliers[row][col];
                     switch(multiplier) {
                         case DL: {
                             tileMultiplier = 2;
@@ -218,7 +218,7 @@ public class Board {
 
             pointValue *= wordMultiplier;
 
-            var word = wordBuilder.toString();
+            String word = wordBuilder.toString();
             if(!Scrabble.getDictionary().contains(word)) {
                 return WordPlacementInfo.invalidWord(word);
             }
@@ -239,14 +239,14 @@ public class Board {
 
         for(int i = 0; i < SIZE; i++) {
             for(int j = 0; j < SIZE; j++) {
-                var tile = tiles[i][j];
-                var multiplier = multipliers[i][j];
-                var color = multiplier.getColor();
+                Tile tile = tiles[i][j];
+                Multiplier multiplier = multipliers[i][j];
+                Color color = multiplier.getColor();
 
-                var x = j * BOARD_SPACING + TILE_GAPS / 2;
-                var y = i * BOARD_SPACING + TILE_GAPS / 2;
-                var textX = x + TILE_SIZE / 2;
-                var textY = y + TILE_SIZE * 0.7f;
+                float x = j * BOARD_SPACING + TILE_GAPS / 2;
+                float y = i * BOARD_SPACING + TILE_GAPS / 2;
+                float textX = x + TILE_SIZE / 2;
+                float textY = y + TILE_SIZE * 0.7f;
 
                 graphics.textSize(TILE_SIZE * 0.7f);
                 graphics.textAlign(graphics.CENTER);
@@ -260,18 +260,18 @@ public class Board {
                     }
                 } else {
                     // Get status of neighboring cells
-                    var up = i > 0 && tiles[i - 1][j] != null && tiles[i - 1][j].isFinalized();
-                    var down = i < SIZE - 1 && tiles[i + 1][j] != null && tiles[i + 1][j].isFinalized();
-                    var left = j > 0 && tiles[i][j - 1] != null && tiles[i][j - 1].isFinalized();
-                    var right = j < SIZE - 1 && tiles[i][j + 1] != null && tiles[i][j + 1].isFinalized();
+                    boolean up = i > 0 && tiles[i - 1][j] != null && tiles[i - 1][j].isFinalized();
+                    boolean down = i < SIZE - 1 && tiles[i + 1][j] != null && tiles[i + 1][j].isFinalized();
+                    boolean left = j > 0 && tiles[i][j - 1] != null && tiles[i][j - 1].isFinalized();
+                    boolean right = j < SIZE - 1 && tiles[i][j + 1] != null && tiles[i][j + 1].isFinalized();
 
-                    var tl = !up && !left ? TILE_RADIUS : 0;
-                    var tr = !up && !right ? TILE_RADIUS : 0;
-                    var bl = !down && !left ? TILE_RADIUS : 0;
-                    var br = !down && !right ? TILE_RADIUS : 0;
+                    float tl = !up && !left ? TILE_RADIUS : 0;
+                    float tr = !up && !right ? TILE_RADIUS : 0;
+                    float bl = !down && !left ? TILE_RADIUS : 0;
+                    float br = !down && !right ? TILE_RADIUS : 0;
 
-                    var w = TILE_SIZE;
-                    var h = TILE_SIZE;
+                    float w = TILE_SIZE;
+                    float h = TILE_SIZE;
 
                     if(left) {
                         x -= TILE_GAPS;
