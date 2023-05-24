@@ -3,11 +3,11 @@ package scrabble;
 import java.util.ArrayList;
 
 public class WordPlacementInfo {
-    public static final WordPlacementInfo INVALID_STRAIGHT_LINE = WordPlacementInfo.invalid("Tiles must be in a straight line");
-    public static final WordPlacementInfo INVALID_NO_TILES = WordPlacementInfo.invalid("No tiles placed");
-    public static final WordPlacementInfo INVALID_GAP_IN_LINE = WordPlacementInfo.invalid("Gaps between tiles are not allowed");
-    public static final WordPlacementInfo INVALID_CENTER_SQUARE = WordPlacementInfo.invalid("First move must use center square");
-    public static final WordPlacementInfo INVALID_TOUCH_EXISTING = WordPlacementInfo.invalid("Move must touch existing tiles");
+    public static final WordPlacementInfo INVALID_STRAIGHT_LINE = invalid("Tiles must be in a straight line");
+    public static final WordPlacementInfo INVALID_NO_TILES = invalid("No tiles placed");
+    public static final WordPlacementInfo INVALID_GAP_IN_LINE = invalid("Gaps between tiles are not allowed");
+    public static final WordPlacementInfo INVALID_CENTER_SQUARE = invalid("First move must use center square");
+    public static final WordPlacementInfo INVALID_TOUCH_EXISTING = invalid("Move must touch existing tiles");
     public final boolean isValid;
     public final String invalidReason;
     public final ArrayList<WordPlacement> words;
@@ -27,6 +27,6 @@ public class WordPlacementInfo {
     }
 
     public static WordPlacementInfo invalidWord(String word) {
-        return WordPlacementInfo.invalid("Invalid word: " + word);
+        return invalid("Invalid word: " + word);
     }
 }

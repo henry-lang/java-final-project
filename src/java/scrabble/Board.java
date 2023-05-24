@@ -42,8 +42,11 @@ public class Board {
 //        tiles[1][4] = new Tile('t', 2, false);
 
         tiles[CENTER - 1][CENTER] = new Tile('c', 3, false);
+        tiles[CENTER - 1][CENTER].makeFinalized();
         tiles[CENTER][CENTER] = new Tile('a', 1, false);
+        tiles[CENTER][CENTER].makeFinalized();
         tiles[CENTER + 1][CENTER] = new Tile('t', 2, false);
+        tiles[CENTER + 1][CENTER].makeFinalized();
     }
 
     private boolean isFirstMove() {
@@ -55,7 +58,7 @@ public class Board {
         outer:
         for (var row : tiles) {
             for (var tile : row) {
-                if (tile != null) {
+                if (tile != null && !tile.isFinalized()) {
                     isPlaced = true;
                     break outer;
                 }

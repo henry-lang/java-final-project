@@ -13,8 +13,6 @@ public class Color {
     }
 
     public Color(int b) {
-        this.r = b;
-        this.g = b;
-        this.b = b;
+        this(b, b, b);
     }
 }
