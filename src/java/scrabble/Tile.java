@@ -9,13 +9,13 @@ public class Tile {
     private boolean isFinalized = false;
 
     public Tile(char letter, int value, boolean isBlank) {
-        this.letter = letter;
+        this.letter = Character.toUpperCase(letter);
         this.value = value;
         this.isBlank = isBlank;
     }
 
     public Tile(char letter, boolean isBlank) {
-        this.letter = letter;
+        this.letter = Character.toUpperCase(letter);
         this.value = 0;
         this.isBlank = isBlank;
     }

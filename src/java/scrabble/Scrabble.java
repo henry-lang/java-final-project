@@ -3,11 +3,6 @@ package scrabble;
 import processing.core.PApplet;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
-import java.util.Scanner;
-import java.util.logging.Logger;
 
 public class Scrabble extends PApplet {
     public static final int WINDOW_WIDTH = 500;
@@ -18,7 +13,7 @@ public class Scrabble extends PApplet {
 
     private static Dictionary dictionary;
     private static Board board;
-    private static Tile[] rack;
+    private static TileRack rack;
 
     public static Dictionary getDictionary() {
         return dictionary;
@@ -56,7 +51,6 @@ public class Scrabble extends PApplet {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-
         PApplet.main(Scrabble.class.getName(), args);
     }
 
@@ -71,6 +65,7 @@ public class Scrabble extends PApplet {
     @Override
     public void setup() {
         board = new Board();
+        rack = new TileRack();
 
         // Load the dictionary
         try {
@@ -94,5 +89,6 @@ public class Scrabble extends PApplet {
     @Override
     public void draw() {
         board.draw(this.g);
+        rack.draw(this.g);
     }
 }

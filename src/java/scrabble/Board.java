@@ -4,8 +4,6 @@ import processing.core.PGraphics;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
-
 import static scrabble.Multiplier.*;
 
 public class Board {
@@ -45,7 +43,7 @@ public class Board {
 
         tiles[CENTER - 1][CENTER] = new Tile('c', 3, false);
         tiles[CENTER][CENTER] = new Tile('a', 1, false);
-        tiles[CENTER + 1][CENTER] = new Tile('o', 2, false);
+        tiles[CENTER + 1][CENTER] = new Tile('t', 2, false);
     }
 
     private boolean isFirstMove() {
@@ -294,7 +292,7 @@ public class Board {
                     graphics.fill(242, 173, 26);
                     graphics.rect(x, y, w, h, tl, tr, br, bl);
                     graphics.fill(0);
-                    graphics.text(Character.toUpperCase(tile.getLetter()), textX, textY);
+                    graphics.text(tile.getLetter(), textX, textY);
                 }
             }
         }
