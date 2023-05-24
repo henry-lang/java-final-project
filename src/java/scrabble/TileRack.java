@@ -6,15 +6,19 @@ public class TileRack {
     private final int TILE_WIDTH = 45;
     private final int TILE_GAP = 10;
 
-    private Tile[] tiles;
+    private Tile[] tiles = new Tile[7];
+    private int indexDragging = -1;
 
     public TileRack() {
-        tiles = new Tile[7];
         // to be removed later
         for (int i = 0; i < 7; i++) add(new Tile('a', 1, false));
     }
 
-    public void startDragging() {
+    public void handleClick() {
+
+    }
+
+    public void handleRelease() {
 
     }
 
