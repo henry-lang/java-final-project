@@ -52,9 +52,7 @@ public class Server {
             while(true) {
                 int readyChannels = selector.select();
 
-                if(readyChannels == 0) {
-                    continue;
-                }
+                if(readyChannels == 0) continue;
 
                 Set<SelectionKey> selectedKeys = selector.selectedKeys();
                 Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
@@ -62,26 +60,26 @@ public class Server {
                 while(keyIterator.hasNext()) {
                     SelectionKey key = keyIterator.next();
 
-                    if(key.isAcceptable()) {
-                        ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
-                        SocketChannel clientChannel = serverChannel.accept();
-                        clientChannel.configureBlocking(false);
-                        clientChannel.register(selector, SelectionKey.OP_READ);
+                    if (!key.isAcceptable()) continue; // nesting = gross
 
-                        clients.put(clientChannel, new ClientInfo(ClientState.CONNECTED));
+                    ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
+                    SocketChannel clientChannel = serverChannel.accept();
+                    clientChannel.configureBlocking(false);
+                    clientChannel.register(selector, SelectionKey.OP_READ);
 
-                        System.out.println("New client connected: " + clientChannel.getRemoteAddress());
-                    }
+                    clients.put(clientChannel, new ClientInfo(ClientState.CONNECTED));
 
-                    if(key.isReadable()) {
-                        try {
-                            SocketChannel clientChannel = (SocketChannel) key.channel();
-                            readFromClient(clientChannel);
-                        } catch(IOException e) {
-                            System.out.println("Client disconnected");
-                            key.cancel();
-                            e.printStackTrace();
-                        }
+                    System.out.println("New client connected: " + clientChannel.getRemoteAddress());
+
+                    if (!key.isReadable()) continue;
+
+                    try { //
+                        clientChannel = (SocketChannel) key.channel();
+                        readFromClient(clientChannel);
+                    } catch(IOException e) {
+                        System.out.println("Client disconnected");
+                        key.cancel();
+                        e.printStackTrace();
                     }
 
                     // Remove the processed key from the iterator
@@ -121,5 +119,9 @@ public class Server {
 
         // Echo the message back to the client
 //        clientChannel.write(ByteBuffer.wrap(data));
+    }
+
+    private static void broadcast(String msg) {
+
     }
 }
