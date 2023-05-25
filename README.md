@@ -2,7 +2,7 @@
 
 Code for our Java class's final project.
 
-Similar to Words with Friends, a Scrabble knockoff.
+Similar to Words with Friends, an online Scrabble-inspired game.
 
 ## Implementation details
 
