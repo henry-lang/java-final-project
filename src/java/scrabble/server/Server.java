@@ -8,16 +8,14 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class Server {
     private static final int PORT = 8080;
     private static final int GAME_ID_LENGTH = 6;
 
     private static final HashMap<GameInfo, Void> games = new HashMap<>();
+    private static final HashMap<String, GameInfo> privateGames = new HashMap<>();
     private static final HashMap<SocketChannel, ClientInfo> clients = new HashMap<>();
     private static final Random random = new Random();
 
@@ -70,6 +68,7 @@ public class Server {
                         clients.put(clientChannel, new ClientInfo(ClientState.CONNECTED));
 
                         System.out.println("New client connected: " + clientChannel.getRemoteAddress());
+//                        ping(clientChannel);
                     }
                     if (key.isReadable()) {
                         System.out.println("reading");
@@ -79,7 +78,7 @@ public class Server {
                         } catch(IOException e) {
                             System.out.println("Client disconnected");
                             key.cancel();
-                            e.printStackTrace();
+                            // e.printStackTrace(); this is annoying so i commented it out
                         }
                     }
 
@@ -133,16 +132,18 @@ public class Server {
     }
 
     private static boolean invalidGameReq(String id) {
-        for (GameInfo game : games.keySet()) {
-            System.out.println(game.id + " " + id + " " + game.id.equals(id) + " " + game.maxPlayers);
-            if (!game.id.equals(id)) return true;
-            if (game.maxPlayers) return true;
+        for (String gameID : privateGames.keySet()) {
+            if (gameID.equals(id)) {
+                if (privateGames.get(gameID).maxPlayers) return true;
+                return false;
+            }
         }
         return false;
     }
+
     private static void parseMessage(String msg, SocketChannel client) {
         String[] split = msg.split(":");
-        String res = "sample";
+        String res;
         switch (split[0]) { // Refer to documentation for message parsing.
             case "logon": {
                 if (isUsernameInUse(split[1], client)) res = "logon_fail:username in use";
@@ -158,7 +159,10 @@ public class Server {
                 // no reason for this to fail tbh
                 try {
                     String id = generateGameID();
-                    games.put(new GameInfo(id), null);
+                    privateGames.put(id, new GameInfo(id));
+                    ClientInfo info = clients.get(client);
+                    info.state = ClientState.IN_GAME;
+                    info.gameID = id;
                     res = "create_success:" + id;
                 } catch (Exception e) {
                     res = "create_fail:" + e.getMessage();
@@ -169,25 +173,51 @@ public class Server {
             case "join": {
                 // if (idNonexistent(split[1])) res = "join_fail:id nonexistent";
                 // else if (gameInProgress(split[1])) res = "join_fail:game in progress";
-                if (invalidGameReq(split[1])) res = "join_fail:bad game request";
-                else res = "join_success";
+//                System.out.println(clients.get(client).state + " " + clients.get(client).state.equals(ClientState.IN_GAME));
+                ClientInfo info = clients.get(client);
+                if (split.length == 1) res = "join_fail:no join code";
+                else if (info.state.equals(ClientState.IN_GAME)) res = "join_fail:in active game";
+                else if (invalidGameReq(split[1])) res = "join_fail:bad game request";
+                else {
+                    privateGames.get(split[1]).addPlayer();
+                    info.state = ClientState.IN_GAME;
+                    info.gameID = split[1];
+                    res = "join_success";
+                }
+                break;
+            }
+
+            case "leave": {
+                ClientInfo info = clients.get(client);
+                if (!info.state.equals(ClientState.IN_GAME)) res = "leave_fail:not in active game";
+                else {
+                    privateGames.get(info.gameID).removePlayer();
+                    info.gameID = "";
+                    info.state = ClientState.CONNECTED;
+                    res = "leave_success";
+                }
                 break;
             }
 
             case "turn": {
                 // TODO: come back to this one bc it's much more complicated
+                res = "turn_fail:not implemented";
                 break;
             }
 
             default: {
-                res = "Unknown message.";
+                res = "msg_fail:unknown request";
                 break;
             }
         }
 
         System.out.println(res);
+        send(client, res);
+    }
+
+    private static void send(SocketChannel client, String msg) {
         try {
-            byte[] bytes = res.getBytes();
+            byte[] bytes = msg.getBytes();
             ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES + bytes.length);
             buffer.putInt(bytes.length);
             buffer.put(bytes);
@@ -197,8 +227,22 @@ public class Server {
             e.printStackTrace();
         }
     }
-
     private static void broadcast(String msg) {
+        for (SocketChannel client : clients.keySet()) send(client, msg);
+    }
 
+    private static void ping(SocketChannel client) { // for debug
+        new Thread(new Runnable() {
+            public void run() {
+                while (true) {
+                    try {
+                        send(client, "ping");
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 }

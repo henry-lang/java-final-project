@@ -52,3 +52,7 @@ Server messages that are not in response to requests are:
 * `game_end:{winner}`- broadcast to end game
   * Payload
     * `winner: String` - name of winning player
+
+If the client sent the server a malformed request (e.g. `jion` instead of `join`)
+or a request not in this documentation (e.g. `abc123`),
+the server will respond with `msg_fail:unkown request`.
