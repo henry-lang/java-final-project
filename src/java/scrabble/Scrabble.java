@@ -4,9 +4,7 @@ import processing.core.PApplet;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.SocketChannel;
 import java.util.Random;
 import java.util.Scanner;
@@ -40,7 +38,7 @@ public class Scrabble extends PApplet {
             // Connect to the server
             socketChannel = SocketChannel.open();
             socketChannel.connect(new InetSocketAddress(SERVER_HOST, SERVER_PORT));
-            queue = new ConcurrentLinkedQueue();
+            queue = new ConcurrentLinkedQueue<>();
             System.out.println("Connected to the server.");
 
             // Read events from the console and send them to the server
@@ -53,49 +51,45 @@ public class Scrabble extends PApplet {
     }
 
     public static void openCmdThread() { // to be used for development
-        new Thread(new Runnable() {
-            public void run() {
-                Scanner scanner = new Scanner(System.in);
-                System.out.print("Enter a username: ");
-                String input = "logon:" + scanner.nextLine();
-                send(input);
-                while (true) {
-                    System.out.print("Enter an event to send (or 'quit' to exit): ");
-                    input = scanner.nextLine();
-                    if (input.equalsIgnoreCase("quit")) {
-                        System.exit(0);
-                    }
-
-                    send(input);
+        new Thread(() -> {
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("Enter a username: ");
+            String input = "logon:" + scanner.nextLine();
+            send(input);
+            while (true) {
+                System.out.print("Enter an event to send (or 'quit' to exit): ");
+                input = scanner.nextLine();
+                if (input.equalsIgnoreCase("quit")) {
+                    System.exit(0);
                 }
+
+                send(input);
             }
         }).start();
     }
 
     public static void startReception() {
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    while (true) {
-                        lengthBuffer.clear();
-                        int bytesRead = socketChannel.read(lengthBuffer);
-                        if (bytesRead == -1) break; // Connection closed by server
+        new Thread(() -> {
+            try {
+                while (true) {
+                    lengthBuffer.clear();
+                    int bytesRead = socketChannel.read(lengthBuffer);
+                    if (bytesRead == -1) break; // Connection closed by server
 
-                        if (lengthBuffer.position() == Integer.BYTES) { // copied from server
-                            lengthBuffer.flip();
-                            int messageSize = lengthBuffer.getInt();
-                            ByteBuffer buffer = ByteBuffer.allocate(messageSize);
-                            socketChannel.read(buffer);
-                            String msg = new String(buffer.array());
+                    if (lengthBuffer.position() == Integer.BYTES) { // copied from server
+                        lengthBuffer.flip();
+                        int messageSize = lengthBuffer.getInt();
+                        ByteBuffer buffer = ByteBuffer.allocate(messageSize);
+                        socketChannel.read(buffer);
+                        String msg = new String(buffer.array());
 
-                            queue.offer(msg);
-                        }
+                        queue.offer(msg);
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    System.out.println("bruv k bye");
-                    System.exit(0);
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("bruv k bye");
+                System.exit(0);
             }
         }).start();
     }
@@ -191,15 +185,12 @@ public class Scrabble extends PApplet {
     }
 
     public void createExitHandler() {
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("Shutting down...");
-                try {
-                    socketChannel.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Shutting down...");
+            try {
+                socketChannel.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }));
     }
