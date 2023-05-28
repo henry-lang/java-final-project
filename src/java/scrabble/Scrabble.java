@@ -2,6 +2,7 @@ package scrabble;
 
 import processing.core.PApplet;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -12,11 +13,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 
+import static scrabble.Board.TILE_SIZE;
+
 public class Scrabble extends PApplet {
     public static final int WINDOW_WIDTH = 500;
     public static final int WINDOW_HEIGHT = 600;
+
     private static final String SERVER_HOST = "localhost";
     private static final int SERVER_PORT = 8080;
+
     private static Random random;
     private static Dictionary dictionary;
     private static Board board;
@@ -24,6 +29,8 @@ public class Scrabble extends PApplet {
     private static SocketChannel socketChannel;
     private static ConcurrentLinkedQueue<String> queue;
     private static final ByteBuffer lengthBuffer = ByteBuffer.allocate(Integer.BYTES);
+
+    private static Tile draggedTile = null;
 
     public static Random getRandom() {
         return random;
@@ -88,7 +95,6 @@ public class Scrabble extends PApplet {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                System.out.println("bruv k bye");
                 System.exit(0);
             }
         }).start();
@@ -198,13 +204,18 @@ public class Scrabble extends PApplet {
     @Override
     public void settings() {
         size(WINDOW_WIDTH, WINDOW_HEIGHT);
-        int displayDensity = displayDensity();
-        pixelDensity(displayDensity);
-        System.out.println("Display Density: " + displayDensity);
     }
 
     @Override
     public void setup() {
+        int displayDensity = displayDensity();
+        pixelDensity(displayDensity);
+        System.out.println("Display Density: " + displayDensity);
+
+        int refreshRate = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].getDisplayMode().getRefreshRate();
+        frameRate(refreshRate);
+        System.out.println("Refresh Rate: " + refreshRate);
+
         createExitHandler();
         windowTitle("Phrases with Phriends");
 
@@ -233,8 +244,48 @@ public class Scrabble extends PApplet {
 
     @Override
     public void draw() {
+        process();
+        background(200);
         board.draw(this.g);
         rack.draw(this.g);
-        process();
+        float x = mouseX - TILE_SIZE / 2;
+        float y = mouseY - TILE_SIZE / 2;
+        float textX = x + TILE_SIZE / 2;
+        float textY = y + TILE_SIZE * 0.7f;
+        if(draggedTile != null) {
+            // TODO: do not do this and write a Tile.draw() method.
+            fill(242, 173, 26);
+            rect(x, y, TILE_SIZE, TILE_SIZE, Board.TILE_RADIUS);
+            fill(0);
+            text(draggedTile.getLetter(), textX, textY);
+        }
+    }
+
+    @Override
+    public void mousePressed() {
+        if(mouseButton != LEFT) return;
+
+        Tile startDrag; // The tile that should start being dragged
+        if(mouseY < width) {
+            startDrag = board.tryDrag(mouseX, mouseY);
+        } else {
+            startDrag = rack.tryDrag(mouseX, mouseY);
+        }
+
+        if(startDrag != null) {
+            draggedTile = startDrag;
+        }
+    }
+
+    @Override
+    public void mouseReleased() {
+        if(mouseButton != LEFT) return;
+
+        if(mouseY < width) {
+            // TODO: do board stuff
+        } else {
+            rack.drop(mouseX, mouseY, draggedTile);
+        }
+        draggedTile = null;
     }
 }

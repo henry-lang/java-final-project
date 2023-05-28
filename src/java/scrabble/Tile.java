@@ -1,5 +1,7 @@
 package scrabble;
 
+import processing.core.PGraphics;
+
 public class Tile {
     private final char letter;
     private final int value;
@@ -38,5 +40,10 @@ public class Tile {
 
     public boolean isFinalized() {
         return isFinalized;
+    }
+
+    // TODO: FINISH THIS METHOD SO THE CODE IS MORE MANAGEABLE
+    public void draw(PGraphics graphics, float x, float y, float size) {
+
     }
 }

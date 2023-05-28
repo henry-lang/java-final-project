@@ -14,8 +14,7 @@ public class Server {
     private static final int PORT = 8080;
     private static final int GAME_ID_LENGTH = 6;
 
-    private static final HashMap<GameInfo, Void> games = new HashMap<>();
-    private static final HashMap<String, GameInfo> privateGames = new HashMap<>();
+    private static final HashMap<String, GameInfo> games = new HashMap<>();
     private static final HashMap<SocketChannel, ClientInfo> clients = new HashMap<>();
     private static final Random random = new Random();
 
@@ -132,9 +131,9 @@ public class Server {
     }
 
     private static boolean invalidGameReq(String id) {
-        for (String gameID : privateGames.keySet()) {
+        for (String gameID : games.keySet()) {
             if (gameID.equals(id)) {
-                if (privateGames.get(gameID).maxPlayers) return true;
+                if (games.get(gameID).maxPlayers) return true;
                 return false;
             }
         }
@@ -159,7 +158,7 @@ public class Server {
                 // no reason for this to fail tbh
                 try {
                     String id = generateGameID();
-                    privateGames.put(id, new GameInfo(id));
+                    games.put(id, new GameInfo(id));
                     ClientInfo info = clients.get(client);
                     info.state = ClientState.IN_GAME;
                     info.gameID = id;
@@ -179,7 +178,7 @@ public class Server {
                 else if (info.state.equals(ClientState.IN_GAME)) res = "join_fail:in active game";
                 else if (invalidGameReq(split[1])) res = "join_fail:bad game request";
                 else {
-                    privateGames.get(split[1]).addPlayer();
+                    games.get(split[1]).addPlayer();
                     info.state = ClientState.IN_GAME;
                     info.gameID = split[1];
                     res = "join_success";
@@ -191,7 +190,7 @@ public class Server {
                 ClientInfo info = clients.get(client);
                 if (!info.state.equals(ClientState.IN_GAME)) res = "leave_fail:not in active game";
                 else {
-                    privateGames.get(info.gameID).removePlayer();
+                    games.get(info.gameID).removePlayer();
                     info.gameID = "";
                     info.state = ClientState.CONNECTED;
                     res = "leave_success";

@@ -68,6 +68,10 @@ public class Board {
         return isPlaced;
     }
 
+    public Tile tryDrag(float mouseX, float mouseY) {
+        return null;
+    }
+
     private static class TileLineInfo {
         public final boolean inStraightLine;
         public final boolean horizontal;
