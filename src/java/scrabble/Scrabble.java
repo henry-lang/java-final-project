@@ -13,8 +13,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 
-import static scrabble.Board.TILE_SIZE;
-
 public class Scrabble extends PApplet {
     public static final int WINDOW_WIDTH = 500;
     public static final int WINDOW_HEIGHT = 600;
@@ -22,15 +20,19 @@ public class Scrabble extends PApplet {
     private static final String SERVER_HOST = "localhost";
     private static final int SERVER_PORT = 8080;
 
+    private static Screen screen;
     private static Random random;
     private static Dictionary dictionary;
-    private static Board board;
-    private static TileRack rack;
     private static SocketChannel socketChannel;
     private static ConcurrentLinkedQueue<String> queue;
     private static final ByteBuffer lengthBuffer = ByteBuffer.allocate(Integer.BYTES);
 
-    private static Tile draggedTile = null;
+    private static Scrabble window;
+
+    public static Scrabble getWindow() {
+        return window;
+    }
+
 
     public static Random getRandom() {
         return random;
@@ -208,20 +210,18 @@ public class Scrabble extends PApplet {
 
     @Override
     public void setup() {
+        frameRate(280);
+        window = this;
+        screen = new GameScreen();
+
         int displayDensity = displayDensity();
         pixelDensity(displayDensity);
         System.out.println("Display Density: " + displayDensity);
-
-        int refreshRate = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].getDisplayMode().getRefreshRate();
-        frameRate(refreshRate);
-        System.out.println("Refresh Rate: " + refreshRate);
 
         createExitHandler();
         windowTitle("Phrases with Phriends");
 
         random = new Random();
-        board = new Board();
-        rack = new TileRack();
 
         // Load the dictionary
         try {
@@ -233,61 +233,21 @@ public class Scrabble extends PApplet {
         }
 
         System.out.println("Loaded dictionary with " + dictionary.size() + " words");
-
-        WordPlacementInfo placement = board.checkWordPlacement();
-        if(placement.isValid) {
-            placement.words.forEach(p -> System.out.println(p.pointValue + " " + p.word));
-        } else {
-            System.out.println(placement.invalidReason);
-        }
     }
 
     @Override
     public void draw() {
         process();
-        background(200);
-        board.draw(this.g);
-        rack.draw(this.g);
-        float x = mouseX - TILE_SIZE / 2;
-        float y = mouseY - TILE_SIZE / 2;
-        float textX = x + TILE_SIZE / 2;
-        float textY = y + TILE_SIZE * 0.7f;
-        if(draggedTile != null) {
-            // TODO: do not do this and write a Tile.draw() method.
-            fill(242, 173, 26);
-            rect(x, y, TILE_SIZE, TILE_SIZE, Board.TILE_RADIUS);
-            fill(0);
-            text(draggedTile.getLetter(), textX, textY);
-        }
+        screen.onFrame(this.g);
     }
 
     @Override
     public void mousePressed() {
-        if(mouseButton != LEFT) return;
-
-        Tile startDrag; // The tile that should start being dragged
-        if(mouseY < width) {
-            startDrag = board.tryDrag(mouseX, mouseY);
-        } else {
-            startDrag = rack.tryDrag(mouseX, mouseY);
-        }
-
-        if(startDrag != null) {
-            draggedTile = startDrag;
-        }
+        screen.mousePressed(mouseButton);
     }
 
     @Override
     public void mouseReleased() {
-        if(mouseButton != LEFT) return;
-
-        if(mouseY < width) {
-            if(!board.tryDrop(mouseX, mouseY, draggedTile)) {
-                rack.add(draggedTile);
-            }
-        } else {
-            rack.drop(mouseX, mouseY, draggedTile);
-        }
-        draggedTile = null;
+        screen.mouseReleased(mouseButton);
     }
 }

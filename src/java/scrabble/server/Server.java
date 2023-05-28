@@ -77,7 +77,6 @@ public class Server {
                         } catch(IOException e) {
                             System.out.println("Client disconnected");
                             key.cancel();
-                            // e.printStackTrace(); this is annoying so i commented it out
                         }
                     }
 
