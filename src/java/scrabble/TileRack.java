@@ -6,18 +6,12 @@ public class TileRack {
     private final float TILE_SIZE = 45;
     private final float TILE_GAP = 10;
 
-    private Tile[] tiles = new Tile[7];
-    private int indexDragging = -1;
+    private final Tile[] tiles = new Tile[7];
 
     public TileRack() {
         // to be removed later
         for (int i = 0; i < 7; i++) add(new Tile('a', 1, false));
     }
-
-    public void handleRelease() {
-
-    }
-
 
     public void add(Tile newTile) {
         for (int i = 0; i < tiles.length; i++) {
@@ -56,7 +50,8 @@ public class TileRack {
         }
     }
 
-    private int getIndex(float mouseX, float mouseY) {
+    private int getMouseIndex(float mouseX, float mouseY) {
+        // TODO: stop hardcoding here lol
         if(mouseY < 527.5f || mouseY > 527.5f + TILE_SIZE) return -1;
         float tileRatio = 1 - (TILE_GAP / (TILE_SIZE + TILE_GAP));
         float tileIndex = ((mouseX - 60) / (TILE_SIZE + TILE_GAP));
@@ -65,7 +60,7 @@ public class TileRack {
     }
 
     public Tile tryDrag(float mouseX, float mouseY) {
-        int index = getIndex(mouseX, mouseY);
+        int index = getMouseIndex(mouseX, mouseY);
         if(index == -1) {
             return null;
         }
@@ -75,7 +70,7 @@ public class TileRack {
     }
 
     public void drop(float mouseX, float mouseY, Tile tile) {
-        int index = getIndex(mouseX, mouseY);
+        int index = getMouseIndex(mouseX, mouseY);
 
         if(index == -1 || tiles[index] != null) {
             add(tile);

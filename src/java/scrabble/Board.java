@@ -68,8 +68,43 @@ public class Board {
         return isPlaced;
     }
 
+    private int getMouseColumn(float mouseX) {
+        float tileRatio = 1 - (TILE_GAPS / (TILE_SIZE + TILE_GAPS));
+        float column = ((mouseX) / (TILE_SIZE + TILE_GAPS));
+        if(column % 1 >= tileRatio || column < 0 || column >= tiles.length) return -1;
+        return (int) column;
+    }
+
+    private int getMouseRow(float mouseY) {
+        float tileRatio = 1 - (TILE_GAPS / (TILE_SIZE + TILE_GAPS));
+        float row = ((mouseY) / (TILE_SIZE + TILE_GAPS));
+        if(row % 1 >= tileRatio || row < 0 || row >= tiles.length) return -1;
+        return (int) row;
+    }
+
     public Tile tryDrag(float mouseX, float mouseY) {
-        return null;
+        int col = getMouseColumn(mouseX);
+        int row = getMouseRow(mouseY);
+
+        if(col != -1 && row != -1 && tiles[row][col] != null && !tiles[row][col].isFinalized()) {
+            Tile tile = tiles[row][col];
+            tiles[row][col] = null;
+            return tile;
+        } else {
+            return null;
+        }
+    }
+
+    public boolean tryDrop(float mouseX, float mouseY, Tile tile) {
+        int col = getMouseColumn(mouseX);
+        int row = getMouseRow(mouseY);
+
+        if(col != -1 && row != -1 && tiles[row][col] == null) {
+            tiles[row][col] = tile;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private static class TileLineInfo {

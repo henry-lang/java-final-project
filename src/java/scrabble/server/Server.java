@@ -99,6 +99,7 @@ public class Server {
             // Connection closed by client
             clientChannel.close();
             System.out.println("Client disconnected: " + clientChannel.getRemoteAddress());
+            clients.remove(clientChannel);
             return;
         }
 
@@ -156,16 +157,16 @@ public class Server {
             case "create": {
                 // generate game id; return success
                 // no reason for this to fail tbh
-                try {
-                    String id = generateGameID();
-                    games.put(id, new GameInfo(id));
-                    ClientInfo info = clients.get(client);
-                    info.state = ClientState.IN_GAME;
-                    info.gameID = id;
-                    res = "create_success:" + id;
-                } catch (Exception e) {
-                    res = "create_fail:" + e.getMessage();
+                ClientInfo info = clients.get(client);
+                if(info.state != ClientState.CONNECTED) {
+                    res = "create_fail:already in game or waiting";
+                    break;
                 }
+                String id = generateGameID();
+                games.put(id, new GameInfo(id));
+                info.state = ClientState.IN_GAME;
+                info.gameID = id;
+                res = "create_success:" + id;
                 break;
             }
 
@@ -228,20 +229,5 @@ public class Server {
     }
     private static void broadcast(String msg) {
         for (SocketChannel client : clients.keySet()) send(client, msg);
-    }
-
-    private static void ping(SocketChannel client) { // for debug
-        new Thread(new Runnable() {
-            public void run() {
-                while (true) {
-                    try {
-                        send(client, "ping");
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
     }
 }

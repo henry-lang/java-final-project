@@ -282,7 +282,9 @@ public class Scrabble extends PApplet {
         if(mouseButton != LEFT) return;
 
         if(mouseY < width) {
-            // TODO: do board stuff
+            if(!board.tryDrop(mouseX, mouseY, draggedTile)) {
+                rack.add(draggedTile);
+            }
         } else {
             rack.drop(mouseX, mouseY, draggedTile);
         }
