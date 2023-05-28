@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="phrases_client">
+    <output-path>$PROJECT_DIR$/out/artifacts/phrases_client</output-path>
+    <root id="archive" name="phrases_client.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src/resources/client/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="java-final-project" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/core.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/jogl-all.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/gluegen-rt.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
