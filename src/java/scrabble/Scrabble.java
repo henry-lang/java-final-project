@@ -210,7 +210,6 @@ public class Scrabble extends PApplet {
 
     @Override
     public void setup() {
-        frameRate(280);
         window = this;
         screen = new GameScreen();
 
@@ -238,7 +237,10 @@ public class Scrabble extends PApplet {
     @Override
     public void draw() {
         process();
-        screen.onFrame(this.g);
+        Screen next = screen.onFrame(this.g);
+        if(next != null) {
+            screen = null;
+        }
     }
 
     @Override
