@@ -1,12 +1,17 @@
 package scrabble;
 
 import processing.core.PApplet;
+import processing.core.PImage;
 
-import java.awt.*;
+import javax.imageio.ImageIO;
+import java.awt.Image;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -210,19 +215,34 @@ public class Scrabble extends PApplet {
     @Override
     public void settings() {
         size(WINDOW_WIDTH, WINDOW_HEIGHT);
-    }
-
-    @Override
-    public void setup() {
-        window = this;
-        screen = new WelcomeScreen();
 
         int displayDensity = displayDensity();
         pixelDensity(displayDensity);
         System.out.println("Display Density: " + displayDensity);
+    }
+
+    @Override
+    public void setup() {
+
+        window = this;
+        screen = new WelcomeScreen();
 
         createExitHandler();
         windowTitle("Phrases with Phriends");
+
+        URL iconResource = Objects.requireNonNull(this.getClass().getResource("/icon.png"));
+        try {
+            Image image = ImageIO.read(iconResource);
+            // We probably won't update the library so this doesn't really matter
+            @SuppressWarnings("deprecation")
+            PImage icon = new PImage(image);
+            surface.setIcon(icon);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Failed to load app icon.");
+        }
+        long end = System.currentTimeMillis();
+
 
         random = new Random();
 
