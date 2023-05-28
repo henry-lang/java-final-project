@@ -23,7 +23,7 @@ public class GameScreen implements Screen {
     }
 
     @Override
-    public Screen onFrame(PGraphics graphics) {
+    public void onFrame(PGraphics graphics) {
         graphics.background(200);
         board.draw(graphics);
         rack.draw(graphics);
@@ -38,8 +38,6 @@ public class GameScreen implements Screen {
             graphics.fill(0);
             graphics.text(draggedTile.getLetter(), textX, textY);
         }
-
-        return null;
     }
 
     @Override

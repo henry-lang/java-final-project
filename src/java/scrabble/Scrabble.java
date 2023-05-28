@@ -59,6 +59,10 @@ public class Scrabble extends PApplet {
         }
     }
 
+    public static void changeScreen(Screen screen) {
+        Scrabble.screen = screen;
+    }
+
     public static void openCmdThread() { // to be used for development
         new Thread(() -> {
             Scanner scanner = new Scanner(System.in);
@@ -211,7 +215,7 @@ public class Scrabble extends PApplet {
     @Override
     public void setup() {
         window = this;
-        screen = new GameScreen();
+        screen = new WelcomeScreen();
 
         int displayDensity = displayDensity();
         pixelDensity(displayDensity);
@@ -237,10 +241,7 @@ public class Scrabble extends PApplet {
     @Override
     public void draw() {
         process();
-        Screen next = screen.onFrame(this.g);
-        if(next != null) {
-            screen = null;
-        }
+        screen.onFrame(this.g);
     }
 
     @Override
