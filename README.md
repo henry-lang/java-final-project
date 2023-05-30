@@ -33,7 +33,7 @@ Possible requests and responses are:
   * Responses
     * `random_waiting` - successfully placed in the queue
     * `random_game_found` - client has been matched with another - THIS MAY BE SENT INSTANTLY WITHOUT WAITING, but if client must wait for a game `random_waiting` will be sent
-    * `random_fail:{reason}` - failed adding player to queue for 
+    * `random_fail:{reason}` - failed adding player to queue
 * `join:{id}` - request to join a new game
   * Payload
     * `id: String` - ID of game to join
