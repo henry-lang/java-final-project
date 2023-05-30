@@ -6,17 +6,15 @@ import processing.core.PImage;
 import javax.imageio.ImageIO;
 import java.awt.Image;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.time.format.DateTimeFormatter;
-import java.time.LocalDateTime;
 
 public class Scrabble extends PApplet {
     public static final int WINDOW_WIDTH = 500;
@@ -57,7 +55,7 @@ public class Scrabble extends PApplet {
 
             // Read events from the console and send them to the server
             startReception();
-            openCmdThread();
+//            openCmdThread();
             PApplet.main(Scrabble.class.getName(), args);
         } catch (IOException e) {
             e.printStackTrace();
@@ -73,7 +71,7 @@ public class Scrabble extends PApplet {
             Scanner scanner = new Scanner(System.in);
             System.out.print("Enter a username: ");
             String input = "logon:" + scanner.nextLine();
-            send(input);
+            sendMessage(input);
             while (true) {
                 System.out.print("Enter an event to send (or 'quit' to exit): ");
                 input = scanner.nextLine();
@@ -81,7 +79,7 @@ public class Scrabble extends PApplet {
                     System.exit(0);
                 }
 
-                send(input);
+                sendMessage(input);
             }
         }).start();
     }
@@ -111,77 +109,22 @@ public class Scrabble extends PApplet {
         }).start();
     }
 
-    public static void parseMessage(String res) {
+    public static void handleMessage(String res) {
         String[] split = res.split(":");
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-        LocalDateTime time = LocalDateTime.now();
-        String msg = formatter.format(time) + ": ";
-        switch (split[0]) {
-            case "logon_success": {
-                msg += "Successfully logged on with username.";
-                break;
-            }
-
-            case "logon_fail": {
-                msg += "Failed to log on. Reason: " + split[1];
-                break;
-            }
-
-            case "create_success": {
-                msg += "Successfully created game. ID: " + split[1];
-                break;
-            }
-
-            case "create_fail": {
-                msg += "Failed to create game. Reason: " + split[1];
-                break;
-            }
-
-            case "join_success": {
-                msg += "Successfully joined game.";
-                break;
-            }
-
-            case "join_fail": {
-                msg += "Failed to join game. Reason: " + split[1];
-                break;
-            }
-
-            case "leave_success": {
-                msg += "Successfully left game.";
-                break;
-            }
-
-            case "leave_fail": {
-                msg += "Failed to leave game. Reason: " + split[1];
-                break;
-            }
-
-            case "turn_success:": {
-                msg += "Successful turn.";
-                break;
-            }
-
-            case "turn_fail": {
-                msg += "Turn submission failed. Reason: " + split[1];
-                break;
-            }
-
-            case "ping": {
-                msg += "[debug] received ping";
-                break;
-            }
-
-            default: {
-                msg += "Unknown response from server. Message received: " + res;
-                break;
-            }
+        if(split.length < 1) {
+            System.out.println("Server responded with empty message.");
         }
 
-        System.out.println(msg);
+        // Kind of bad temporary variable stuff but whatever
+        String[] rest = Arrays.copyOfRange(split, 1, split.length);
+
+        System.out.println("Received server message, id: " + split[0] + ", data: " + Arrays.toString(rest));
+        if(!screen.handleMessage(split[0], rest)) {
+            System.out.println("Unsupported message: " + split[0]);
+        }
     }
 
-    public static void send(String msg) {
+    public static void sendMessage(String msg) {
         try {
             byte[] bytes = msg.getBytes();
             ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES + bytes.length);
@@ -196,8 +139,7 @@ public class Scrabble extends PApplet {
 
     public void process() {
         while (!queue.isEmpty()) {
-//            System.out.println("parsing");
-            parseMessage(queue.poll());
+            handleMessage(queue.poll());
         }
     }
 
@@ -241,8 +183,6 @@ public class Scrabble extends PApplet {
             e.printStackTrace();
             System.out.println("Failed to load app icon.");
         }
-        long end = System.currentTimeMillis();
-
 
         random = new Random();
 

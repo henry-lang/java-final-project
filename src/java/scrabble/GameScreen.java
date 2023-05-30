@@ -1,7 +1,6 @@
 package scrabble;
 
 import processing.core.PGraphics;
-import processing.core.PVector;
 
 import static processing.core.PConstants.LEFT;
 import static scrabble.Board.TILE_SIZE;
@@ -38,11 +37,6 @@ public class GameScreen implements Screen {
             graphics.fill(0);
             graphics.text(draggedTile.getLetter(), textX, textY);
         }
-    }
-
-    @Override
-    public void handleServerMessage() {
-
     }
 
     @Override

@@ -28,6 +28,11 @@ Possible requests and responses are:
     * `create_fail:{reason}` - failed to create a new game
       * Payload
         * `reason: String` - reason for failure
+* `random` - request to join a random game
+  * Payload: None
+  * Responses
+    * `random_waiting` - successfully placed in the queue
+    * `random_game_found` - client has been matched with another - THIS MAY BE SENT INSTANTLY WITHOUT WAITING, but if client must wait for a game `random_waiting` will be sent
 * `join:{id}` - request to join a new game
   * Payload
     * `id: String` - ID of game to join
