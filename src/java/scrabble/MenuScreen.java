@@ -28,7 +28,7 @@ public class MenuScreen implements Screen {
         graphics.text("Random Game", screenCenter / 2, 300);
         graphics.text("Private Game", screenCenter + screenCenter / 2, 300);
 
-        // Draw the last rectangle with a black outline
+        // Draw the die icon
         graphics.stroke(0); // Set outline color to black
         graphics.rect(50, 350, screenCenter - 100, screenCenter - 100, 20);
 
@@ -75,13 +75,14 @@ public class MenuScreen implements Screen {
     @Override
     public boolean handleMessage(String type, String[] data) {
         switch(type) {
-            case "create_success": {
+            case "random_game_found": {
                 Scrabble.changeScreen(new GameScreen());
+                return true;
             }
             case "create_fail": {
                 errorMessage = data[1];
+                return true;
             }
-            return true;
             default: {
                 return false;
             }
@@ -91,6 +92,14 @@ public class MenuScreen implements Screen {
     @Override
     public void mousePressed(int mouseButton) {
         if(mouseButton != LEFT) return;
-        Scrabble.sendMessage("create");
+
+        float mouseX = Scrabble.getWindow().mouseX;
+        float mouseY = Scrabble.getWindow().mouseY;
+        float screenCenter = Scrabble.WINDOW_WIDTH / 2.0f;
+        float screenHeight = Scrabble.WINDOW_HEIGHT;
+
+        if(mouseX >= 50 && mouseX <= screenCenter - 50 && mouseY >= 350 && mouseY <= 250 + screenCenter) {
+            Scrabble.sendMessage("random");
+        }
     }
 }

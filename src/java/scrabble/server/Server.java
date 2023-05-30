@@ -17,6 +17,7 @@ public class Server {
     private static final int GAME_ID_LENGTH = 6;
 
     private static final HashMap<String, GameInfo> games = new HashMap<>();
+    private static SocketChannel randomWaiting;
     private static final HashMap<SocketChannel, ClientInfo> clients = new HashMap<>();
     private static final Random random = new Random();
 
@@ -24,13 +25,13 @@ public class Server {
 
     public static String generateGameID() {
         while(true) {
-            var chars = new char[GAME_ID_LENGTH];
+            char[] chars = new char[GAME_ID_LENGTH];
 
             for(int i = 0; i < chars.length; i++) {
                 chars[i] = (char) ('a' + random.nextInt(26));
             }
 
-            var id = new String(chars);
+            String id = new String(chars);
 
             if(!games.containsKey(id)) {
                 return id;
@@ -168,6 +169,26 @@ public class Server {
                 info.state = ClientState.IN_GAME;
                 info.gameID = id;
                 res = "create_success:" + id;
+                break;
+            }
+
+            case "random": {
+                ClientInfo info = clients.get(client);
+                if(info.state != ClientState.CONNECTED) {
+                    res = "random_fail:already in game or waiting";
+                    break;
+                }
+                if(randomWaiting == null) {
+                    randomWaiting = client;
+                    clients.get(randomWaiting).state = ClientState.IN_GAME;
+                    res = "random_waiting";
+                    System.out.println("New client waiting for random game");
+                } else {
+                    String id = generateGameID();
+                    games.put(id, new GameInfo(id));
+                    send(randomWaiting, "random_game_found");
+                    res = "random_game_found";
+                }
                 break;
             }
 
