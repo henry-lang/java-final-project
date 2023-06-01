@@ -107,32 +107,6 @@ public class Board {
         }
     }
 
-    private static class TileLineInfo {
-        public final boolean inStraightLine;
-        public final boolean horizontal;
-        public final int startRow;
-        public final int startCol;
-        public final int endRow;
-        public final int endCol;
-
-        public static final TileLineInfo NOT_IN_STRAIGHT_LINE = new TileLineInfo(false, false, -1, -1, -1, -1);
-
-        public TileLineInfo(boolean inStraightLine, boolean horizontal, int startRow, int startCol, int endRow, int endCol) {
-            this.inStraightLine = inStraightLine;
-            this.horizontal = horizontal;
-            this.startRow = startRow;
-            this.startCol = startCol;
-            this.endRow = endRow;
-            this.endCol = endCol;
-        }
-
-        public boolean intersects(int row, int col) {
-            return horizontal
-                ? (row == 0 && col >= startCol && col <= endCol)
-                : (col == 0 && row >= startRow && row <= endRow);
-        }
-    }
-
     private TileLineInfo tilesInStraightLine() {
         int startRow = -1;
         int startCol = -1;
@@ -186,6 +160,53 @@ public class Board {
         return false;
     }
 
+    private int[] extendWord(boolean horizontal, int start, int end, int rc) {
+        // note: rc means row/column. it's just the other value needed to access the 2d array
+        if (horizontal) {
+            while (start > 0 && tiles[start - 1][rc] != null) start -= 1;
+            while (end < SIZE - 1 && tiles[end + 1][rc] != null) end += 1;
+        } else {
+            while (start > 0 && tiles[rc][start - 1] != null) start -= 1;
+            while (end < SIZE - 1 && tiles[rc][end + 1] != null) end += 1;
+        }
+
+        return new int[]{start, end};
+    }
+
+    public boolean validateSubWord(boolean horizontal, int start, int end, int rc) {
+        StringBuilder builder = new StringBuilder();
+        Tile tile = tiles[0][0];
+        int tileMultiplier = 1;
+        int wordMultiplier = 1;
+        int pts = 0;
+        if (horizontal) {
+            for (int c = start; c <= end; c++) {
+                if (!tile.isFinalized()) {
+                    Multiplier multiplier = multipliers[rc][c];
+                    switch(multiplier) {
+                        case DL: {
+                            tileMultiplier = 2;
+                            break;
+                        }
+                        case TL: {
+                            tileMultiplier = 3;
+                            break;
+                        }
+                        case DW: {
+                            wordMultiplier *= 2;
+                            break;
+                        }
+                        case TW: {
+                            wordMultiplier *= 3;
+                        }
+                    }
+                }
+                pts += tile.getValue() * tileMultiplier;
+                builder.append(tile.getLetter());
+            }
+        }
+        return true;
+    }
     public WordPlacementInfo checkWordPlacement() {
 
         if(!anyTilesPlaced()) {
@@ -206,29 +227,24 @@ public class Board {
         }
 
         ArrayList<WordPlacement> words = new ArrayList<>();
+        int col = lineInfo.startCol;
         if(lineInfo.horizontal) {
-            int col = lineInfo.startCol;
             while(col > 0 && tiles[lineInfo.startRow][col] != null) {
                 col -= 1;
             }
         } else {
-            int col = lineInfo.startCol;
-
             // Extend the line if there are tiles after or before the line
-            int startRow = lineInfo.startRow;
-            while(startRow > 0 && tiles[startRow - 1][col] != null) {
-                startRow -= 1;
-            }
-
-            int endRow = lineInfo.endRow;
-            while(endRow < SIZE - 1 && tiles[endRow + 1][col] != null) {
-                endRow += 1;
-            }
+            int[] extendedWord = extendWord(false, lineInfo.startRow, lineInfo.endRow, col);
+            int startRow = extendedWord[0];
+            int endRow = extendedWord[1];
 
             int pointValue = 0;
             int wordMultiplier = 1;
             StringBuilder wordBuilder = new StringBuilder();
-            for(int row = startRow; row <= endRow; row++) {
+            for (int row = startRow; row <= endRow; row++) {
+                extendedWord = extendWord(true, lineInfo.startCol, lineInfo.endCol, row);
+//                if (!validateSubWord(true, extendedWord[0], extendedWord[1], row)) break;
+
                 Tile tile = tiles[row][col];
                 int tileMultiplier = 1;
                 if(!tile.isFinalized()) {
@@ -254,6 +270,7 @@ public class Board {
                 pointValue += tile.getValue() * tileMultiplier;
                 wordBuilder.append(tiles[row][col].getLetter());
             }
+
 
             pointValue *= wordMultiplier;
 
