@@ -2,16 +2,18 @@ package scrabble;
 
 import processing.core.PGraphics;
 
+import java.util.Random;
+
 import static processing.core.PConstants.*;
 
-enum SelectedTextBox {
-    NONE,
-    USERNAME,
-    GAME_CODE
-}
-
 public class MenuScreen implements Screen {
-    private String username = "";
+    enum SelectedTextBox {
+        NONE,
+        USERNAME,
+        GAME_CODE
+    }
+
+    private static String username = "";
     private String gameCode = "";
     private String errorMessage = "";
     private SelectedTextBox selectedTextBox;
@@ -89,6 +91,10 @@ public class MenuScreen implements Screen {
     @Override
     public boolean handleMessage(String type, String[] data) {
         switch(type) {
+            case "random_waiting": {
+                Scrabble.changeScreen(new RandomWaitingScreen());
+                return true;
+            }
             case "random_game_found": {
                 Scrabble.changeScreen(new GameScreen());
                 return true;

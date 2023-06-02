@@ -11,7 +11,7 @@ public class WelcomeScreen implements Screen {
         // TODO: stop hardcoding here too
         float screenCenter = Scrabble.WINDOW_WIDTH / 2.0f;
 
-        graphics.background(66, 170, 255);
+        graphics.background(Color.MENU_COLOR.r, Color.MENU_COLOR.g, Color.MENU_COLOR.b);
         // Render the welcome message
         graphics.fill(255);
         graphics.textAlign(CENTER);

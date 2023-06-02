@@ -2,6 +2,8 @@ package scrabble;
 
 // This class is here only because I need to store colors easily without a PGraphics instance
 public class Color {
+    public static final Color MENU_COLOR = new Color(66, 170, 255);
+
     public int r;
     public int g;
     public int b;
