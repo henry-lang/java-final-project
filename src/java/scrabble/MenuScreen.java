@@ -2,13 +2,19 @@ package scrabble;
 
 import processing.core.PGraphics;
 
-import static processing.core.PConstants.CENTER;
-import static processing.core.PConstants.LEFT;
+import static processing.core.PConstants.*;
+
+enum SelectedTextBox {
+    NONE,
+    USERNAME,
+    GAME_CODE
+}
 
 public class MenuScreen implements Screen {
     private String username = "";
     private String gameCode = "";
     private String errorMessage = "";
+    private SelectedTextBox selectedTextBox;
 
     @Override
     public void onFrame(PGraphics graphics) {
@@ -23,6 +29,14 @@ public class MenuScreen implements Screen {
 
         graphics.text("Enter a username:", screenCenter, 60);
         graphics.rect(screenCenter - 100, 100, 200, 40);
+        graphics.fill(0);
+        graphics.textAlign(LEFT);
+        graphics.text(username, screenCenter - 95, 100 + 40 * 0.8f);
+        if(selectedTextBox == SelectedTextBox.USERNAME) {
+            graphics.rect(screenCenter - 94 + graphics.textWidth(username), 105, 3, 30);
+        }
+        graphics.textAlign(CENTER);
+        graphics.fill(255);
         graphics.stroke(255);
         graphics.line(screenCenter, 200, screenCenter, screenHeight);
         graphics.text("Random Game", screenCenter / 2, 300);
@@ -96,10 +110,40 @@ public class MenuScreen implements Screen {
         float mouseX = Scrabble.getWindow().mouseX;
         float mouseY = Scrabble.getWindow().mouseY;
         float screenCenter = Scrabble.WINDOW_WIDTH / 2.0f;
-        float screenHeight = Scrabble.WINDOW_HEIGHT;
-
-        if(mouseX >= 50 && mouseX <= screenCenter - 50 && mouseY >= 350 && mouseY <= 250 + screenCenter) {
+        if(mouseX >= screenCenter - 100 && mouseX <= screenCenter + 100 && mouseY >= 100 && mouseY <= 140) {
+            selectedTextBox = SelectedTextBox.USERNAME;
+        } else if(mouseX >= 50 && mouseX <= screenCenter - 50 && mouseY >= 350 && mouseY <= 250 + screenCenter) {
             Scrabble.sendMessage("random");
+        } else {
+            selectedTextBox = SelectedTextBox.NONE;
+        }
+    }
+
+    @Override
+    public void keyPressed(char key, int keyCode) {
+        boolean isValidChar = Character.isAlphabetic(key) || Character.isDigit(key) || key == ' ';
+
+        switch(selectedTextBox) {
+            case USERNAME: {
+                if(isValidChar) {
+                    username += key;
+                } else if(key == '\b') {
+                    if(username.length() > 0) {
+                        username = username.substring(0, username.length() - 1);
+                    }
+                }
+                break;
+            }
+            case GAME_CODE: {
+                if(isValidChar) {
+                    gameCode += key;
+                } else if(key == '\b') {
+                    if(gameCode.length() > 0) {
+                        gameCode = gameCode.substring(0, gameCode.length() - 1);
+                    }
+                }
+                break;
+            }
         }
     }
 }

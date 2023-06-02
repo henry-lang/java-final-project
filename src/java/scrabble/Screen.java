@@ -14,5 +14,5 @@ public interface Screen {
 
     default void mousePressed(int mouseButton) {}
     default void mouseReleased(int mouseButton) {}
-    default void keyPressed() {}
+    default void keyPressed(char key, int keyCode) {}
 }

@@ -213,4 +213,9 @@ public class Scrabble extends PApplet {
     public void mouseReleased() {
         screen.mouseReleased(mouseButton);
     }
+
+    @Override
+    public void keyPressed() {
+        screen.keyPressed(key, keyCode);
+    }
 }

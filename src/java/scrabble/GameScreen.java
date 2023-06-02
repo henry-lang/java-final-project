@@ -72,9 +72,4 @@ public class GameScreen implements Screen {
         }
         draggedTile = null;
     }
-
-    @Override
-    public void keyPressed() {
-
-    }
 }
