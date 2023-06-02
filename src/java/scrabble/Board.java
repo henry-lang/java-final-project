@@ -173,39 +173,49 @@ public class Board {
         return new int[]{start, end};
     }
 
-    public boolean validateSubWord(boolean horizontal, int start, int end, int rc) {
+    int[] getMultipliers(Tile tile, Multiplier multiplier) {
+        int[] multipliers = new int[]{1, 1};
+        if (tile.isFinalized()) return multipliers;
+        switch (multiplier) {
+            case DL: { multipliers[0] = 2; break; }
+            case TL: { multipliers[0] = 3; break; }
+            case DW: { multipliers[1] = 2; break; }
+            case TW: { multipliers[1] = 3; break; }
+        }
+        return multipliers;
+    }
+
+    public WordPlacementInfo validateSubWord(boolean horizontal, int start, int end, int rc) {
         StringBuilder builder = new StringBuilder();
         Tile tile = tiles[0][0];
-        int tileMultiplier = 1;
         int wordMultiplier = 1;
         int pts = 0;
         if (horizontal) {
             for (int c = start; c <= end; c++) {
-                if (!tile.isFinalized()) {
-                    Multiplier multiplier = multipliers[rc][c];
-                    switch(multiplier) {
-                        case DL: {
-                            tileMultiplier = 2;
-                            break;
-                        }
-                        case TL: {
-                            tileMultiplier = 3;
-                            break;
-                        }
-                        case DW: {
-                            wordMultiplier *= 2;
-                            break;
-                        }
-                        case TW: {
-                            wordMultiplier *= 3;
-                        }
-                    }
-                }
-                pts += tile.getValue() * tileMultiplier;
+                int[] multis = getMultipliers(tile, multipliers[rc][c]);
+                wordMultiplier *= multis[1];
+                pts += tile.getValue() * multis[0];
+                builder.append(tile.getLetter());
+            }
+        } else {
+            for (int r = start; r <= end; r++) {
+                int[] multis = getMultipliers(tile, multipliers[r][rc]);
+                wordMultiplier *= multis[1];
+                pts += tile.getValue() * multis[0];
                 builder.append(tile.getLetter());
             }
         }
-        return true;
+
+        pts *= wordMultiplier;
+
+        String word = builder.toString();
+        if(!Scrabble.getDictionary().contains(word)) {
+            return WordPlacementInfo.invalidWord(word);
+        }
+
+        ArrayList<WordPlacement> words = new ArrayList<>();
+        words.add(new WordPlacement(word, pts));
+        return WordPlacementInfo.valid(words);
     }
     public WordPlacementInfo checkWordPlacement() {
 
@@ -243,32 +253,15 @@ public class Board {
             StringBuilder wordBuilder = new StringBuilder();
             for (int row = startRow; row <= endRow; row++) {
                 extendedWord = extendWord(true, lineInfo.startCol, lineInfo.endCol, row);
-//                if (!validateSubWord(true, extendedWord[0], extendedWord[1], row)) break;
+                WordPlacementInfo wpInfo = validateSubWord(false, extendedWord[0], extendedWord[1], row);
+                if (!wpInfo.isValid) return wpInfo;
+                else pointValue += wpInfo.words.get(0).pointValue; // prolly not the behavior we want but oh well
 
                 Tile tile = tiles[row][col];
-                int tileMultiplier = 1;
-                if(!tile.isFinalized()) {
-                    Multiplier multiplier = multipliers[row][col];
-                    switch(multiplier) {
-                        case DL: {
-                            tileMultiplier = 2;
-                            break;
-                        }
-                        case TL: {
-                            tileMultiplier = 3;
-                            break;
-                        }
-                        case DW: {
-                            wordMultiplier *= 2;
-                            break;
-                        }
-                        case TW: {
-                            wordMultiplier *= 3;
-                        }
-                    }
-                }
-                pointValue += tile.getValue() * tileMultiplier;
-                wordBuilder.append(tiles[row][col].getLetter());
+                int[] multis = getMultipliers(tile, multipliers[row][col]);
+                wordMultiplier *= multis[1];
+                pointValue += tile.getValue() * multis[0];
+                wordBuilder.append(tile.getLetter());
             }
 
 
