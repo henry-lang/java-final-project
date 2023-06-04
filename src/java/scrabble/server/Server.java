@@ -10,7 +10,6 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
-import java.util.Set;
 
 public class Server {
     private static final int PORT = 8080;
@@ -55,8 +54,7 @@ public class Server {
 
                 if(readyChannels == 0) continue;
 
-                Set<SelectionKey> selectedKeys = selector.selectedKeys();
-                Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+                Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
 
                 while(keyIterator.hasNext()) {
                     SelectionKey key = keyIterator.next();
@@ -70,10 +68,8 @@ public class Server {
                         clients.put(clientChannel, new ClientInfo(ClientState.CONNECTED));
 
                         System.out.println("New client connected: " + clientChannel.getRemoteAddress());
-//                        ping(clientChannel);
                     }
                     if (key.isReadable()) {
-                        System.out.println("reading");
                         try {
                             SocketChannel clientChannel = (SocketChannel) key.channel();
                             readFromClient(clientChannel);
@@ -136,8 +132,7 @@ public class Server {
     private static boolean invalidGameReq(String id) {
         for (String gameID : games.keySet()) {
             if (gameID.equals(id)) {
-                if (games.get(gameID).maxPlayers) return true;
-                return false;
+                return games.get(gameID).maxPlayers;
             }
         }
         return false;

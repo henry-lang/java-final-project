@@ -24,10 +24,15 @@ public class MenuScreen implements Screen {
         float screenHeight = Scrabble.WINDOW_HEIGHT;
 
         graphics.background(66, 170, 255);
+        graphics.fill(255, 61, 61);
+        graphics.textAlign(CENTER);
+        graphics.textSize(20);
+        if(!errorMessage.isEmpty()) {
+            graphics.text(errorMessage, screenCenter, 175);
+        }
+        graphics.textSize(30);
         graphics.fill(255);
         graphics.stroke(0);
-        graphics.textAlign(CENTER);
-        graphics.textSize(30);
 
         graphics.text("Enter a username:", screenCenter, 60);
         graphics.rect(screenCenter - 100, 100, 200, 40);
@@ -119,7 +124,11 @@ public class MenuScreen implements Screen {
         if(mouseX >= screenCenter - 100 && mouseX <= screenCenter + 100 && mouseY >= 100 && mouseY <= 140) {
             selectedTextBox = SelectedTextBox.USERNAME;
         } else if(mouseX >= 50 && mouseX <= screenCenter - 50 && mouseY >= 350 && mouseY <= 250 + screenCenter) {
-            Scrabble.sendMessage("random");
+            if(username.isEmpty()) {
+                errorMessage = "Error: No username";
+            } else {
+                Scrabble.sendMessage("random");
+            }
         } else {
             selectedTextBox = SelectedTextBox.NONE;
         }
