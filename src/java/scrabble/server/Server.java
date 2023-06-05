@@ -70,11 +70,14 @@ public class Server {
                         System.out.println("New client connected: " + clientChannel.getRemoteAddress());
                     }
                     if (key.isReadable()) {
+                        SocketChannel clientChannel = (SocketChannel) key.channel();
                         try {
-                            SocketChannel clientChannel = (SocketChannel) key.channel();
                             readFromClient(clientChannel);
                         } catch(IOException e) {
                             System.out.println("Client disconnected");
+                            if(clientChannel.equals(randomWaiting)) {
+                                randomWaiting = null;
+                            }
                             key.cancel();
                         }
                     }
@@ -140,7 +143,7 @@ public class Server {
 
     private static void parseMessage(String msg, SocketChannel client) {
         String[] split = msg.split(":");
-        String res;
+        String res = null;
         switch (split[0]) { // Refer to documentation for message parsing.
             case "logon": {
                 if (isUsernameInUse(split[1], client)) res = "logon_fail:username in use";
@@ -187,6 +190,14 @@ public class Server {
                 break;
             }
 
+            case "random_cancel": {
+                if(client.equals(randomWaiting)) {
+                    randomWaiting = null;
+                    clients.get(client).state = ClientState.CONNECTED;
+                }
+                break;
+            }
+
             case "join": {
                 // if (idNonexistent(split[1])) res = "join_fail:id nonexistent";
                 // else if (gameInProgress(split[1])) res = "join_fail:game in progress";
@@ -228,8 +239,9 @@ public class Server {
             }
         }
 
-        System.out.println(res);
-        send(client, res);
+        if(res != null) {
+            send(client, res);
+        }
     }
 
     private static void send(SocketChannel client, String msg) {

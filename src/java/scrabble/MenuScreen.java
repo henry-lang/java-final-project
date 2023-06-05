@@ -23,7 +23,7 @@ public class MenuScreen implements Screen {
         float screenCenter = Scrabble.WINDOW_WIDTH / 2.0f;
         float screenHeight = Scrabble.WINDOW_HEIGHT;
 
-        graphics.background(66, 170, 255);
+        graphics.background(Color.MENU_COLOR.r, Color.MENU_COLOR.g, Color.MENU_COLOR.b);
         graphics.fill(255, 61, 61);
         graphics.textAlign(CENTER);
         graphics.textSize(20);
