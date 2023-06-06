@@ -7,18 +7,20 @@ import static scrabble.Board.TILE_SIZE;
 
 public class GameScreen implements Screen {
     private static final Board board = new Board();
-    private static final TileRack rack = new TileRack();
+    private final TileRack rack;
 
     private static Tile draggedTile = null;
 
 
-    public GameScreen() {
+    public GameScreen(String opponent, Tile[] tiles) {
         WordPlacementInfo placement = board.checkWordPlacement();
         if(placement.isValid) {
             placement.words.forEach(p -> System.out.println(p.pointValue + " " + p.word));
         } else {
             System.out.println(placement.invalidReason);
         }
+
+        rack = new TileRack(tiles);
     }
 
     @Override

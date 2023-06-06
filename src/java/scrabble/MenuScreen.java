@@ -100,8 +100,10 @@ public class MenuScreen implements Screen {
                 Scrabble.changeScreen(new RandomWaitingScreen());
                 return true;
             }
-            case "random_game_found": {
-                Scrabble.changeScreen(new GameScreen());
+            case "random_game_start": {
+                String opponent = data[0];
+                Tile[] tiles = Parsing.parseTiles(data[1]);
+                Scrabble.changeScreen(new GameScreen(opponent, tiles));
                 return true;
             }
             case "create_fail": {
@@ -127,7 +129,7 @@ public class MenuScreen implements Screen {
             if(username.isEmpty()) {
                 errorMessage = "Error: No username";
             } else {
-                Scrabble.sendMessage("random");
+                Scrabble.sendMessage("random:" + username);
             }
         } else {
             selectedTextBox = SelectedTextBox.NONE;

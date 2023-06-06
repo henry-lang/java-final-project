@@ -26,8 +26,10 @@ public class RandomWaitingScreen implements Screen {
     @Override
     public boolean handleMessage(String type, String[] data) {
         switch(type) {
-            case "random_game_found": {
-                Scrabble.changeScreen(new GameScreen());
+            case "random_game_start": {
+                String opponent = data[0];
+                Tile[] tiles = Parsing.parseTiles(data[1]);
+                Scrabble.changeScreen(new GameScreen(opponent, tiles));
                 return true;
             }
             default: {

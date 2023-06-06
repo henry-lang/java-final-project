@@ -36,19 +36,6 @@ public class Board {
     // Unfortunately, java doesn't have good enum types like Rust where Option<Tile> is possible
     private final Tile[][] tiles = new Tile[SIZE][SIZE];
 
-    {
-//        tiles[1][1] = new Tile('c', 3, false);
-//        tiles[1][2] = new Tile('a', 1, false);
-//        tiles[1][4] = new Tile('t', 2, false);
-
-        tiles[CENTER - 1][CENTER] = new Tile('c', 3, false);
-        tiles[CENTER - 1][CENTER].makeFinalized();
-        tiles[CENTER][CENTER] = new Tile('a', 1, false);
-        tiles[CENTER][CENTER].makeFinalized();
-        tiles[CENTER + 1][CENTER] = new Tile('t', 2, false);
-        tiles[CENTER + 1][CENTER].makeFinalized();
-    }
-
     private boolean isFirstMove() {
         return tiles[CENTER][CENTER] == null;
     }

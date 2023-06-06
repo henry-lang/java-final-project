@@ -176,6 +176,7 @@ public class Server {
                     res = "random_fail:already in game or waiting";
                     break;
                 }
+                info.username = split[1];
                 if(randomWaiting == null) {
                     randomWaiting = client;
                     clients.get(randomWaiting).state = ClientState.IN_GAME;
@@ -183,9 +184,11 @@ public class Server {
                     System.out.println("New client waiting for random game");
                 } else {
                     String id = generateGameID();
-                    games.put(id, new GameInfo(id));
-                    send(randomWaiting, "random_game_found");
-                    res = "random_game_found";
+                    GameInfo gameInfo = new GameInfo(id);
+                    games.put(id, gameInfo);
+                    // random_game_start:{username}:{tiles}:{their_turn}
+                    send(randomWaiting, "random_game_start:" + info.username + ":" + gameInfo.getTileMessage(7) + ":true");
+                    res = "random_game_start:" + clients.get(randomWaiting).username + ":" + gameInfo.getTileMessage(7) + ":false";
                 }
                 break;
             }

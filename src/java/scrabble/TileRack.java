@@ -6,11 +6,10 @@ public class TileRack {
     private final float TILE_SIZE = 45;
     private final float TILE_GAP = 10;
 
-    private final Tile[] tiles = new Tile[7];
+    private final Tile[] tiles;
 
-    public TileRack() {
-        // to be removed later
-        for (int i = 0; i < 7; i++) add(new Tile('a', 1, false));
+    public TileRack(Tile[] tiles) {
+        this.tiles = tiles;
     }
 
     public void add(Tile newTile) {
