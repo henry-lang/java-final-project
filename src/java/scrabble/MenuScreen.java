@@ -97,14 +97,14 @@ public class MenuScreen implements Screen {
     public boolean handleMessage(String type, String[] data) {
         switch(type) {
             case "random_waiting": {
-                Scrabble.changeScreen(new RandomWaitingScreen());
+                Scrabble.changeScreen(new RandomWaitingScreen(username));
                 return true;
             }
             case "random_game_start": {
                 String opponent = data[0];
                 Tile[] tiles = Parsing.parseTiles(data[1]);
                 boolean thisTurn = Boolean.parseBoolean(data[2]);
-                Scrabble.changeScreen(new GameScreen(opponent, tiles, thisTurn));
+                Scrabble.changeScreen(new GameScreen(username, opponent, tiles, thisTurn));
                 return true;
             }
             case "create_fail": {

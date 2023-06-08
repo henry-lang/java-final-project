@@ -2,12 +2,11 @@ package scrabble;
 
 import processing.core.PGraphics;
 
-import java.util.Arrays;
-
-import static processing.core.PConstants.LEFT;
+import static processing.core.PConstants.*;
 import static scrabble.Board.TILE_SIZE;
 
 public class GameScreen implements Screen {
+    private static final float SCORES_PADDING = 5;
     private final Board board = new Board();
 
     // Whether it's this client's turn.
@@ -15,12 +14,17 @@ public class GameScreen implements Screen {
     private int thisScore = 0;
     private int opponentScore = 0;
 
+    private String thisUsername;
+    private String opponentUsername;
     private final TileRack rack;
 
     private static Tile draggedTile = null;
 
 
-    public GameScreen(String opponent, Tile[] tiles, boolean thisTurn) {
+    public GameScreen(String thisUsername, String opponentUsername, Tile[] tiles, boolean thisTurn) {
+        this.thisUsername = thisUsername;
+        this.opponentUsername = opponentUsername;
+
         rack = new TileRack(tiles);
         this.thisTurn = thisTurn;
         System.out.println(thisTurn);
@@ -33,7 +37,9 @@ public class GameScreen implements Screen {
         graphics.background(Color.MENU_COLOR.r, Color.MENU_COLOR.g, Color.MENU_COLOR.b);
         board.draw(graphics);
         rack.draw(graphics);
+        drawScores(graphics);
         graphics.fill(255);
+        graphics.textAlign(CENTER);
         if(board.checkWordPlacement().isValid) {
             if(thisTurn) {
                 graphics.rect(screenCenter - 80, boardEnd + 5, 160, 35, 25);
@@ -55,8 +61,23 @@ public class GameScreen implements Screen {
             graphics.fill(242, 173, 26);
             graphics.rect(x, y, TILE_SIZE, TILE_SIZE, Board.TILE_RADIUS);
             graphics.fill(0);
+            graphics.textSize(TILE_SIZE * 0.7f);
             graphics.text(draggedTile.getLetter(), textX, textY);
         }
+    }
+
+    private void drawScores(PGraphics graphics) {
+        graphics.fill(255);
+        graphics.textAlign(LEFT);
+        graphics.textSize(20);
+        graphics.text(thisUsername, SCORES_PADDING, 25);
+        graphics.textSize(30);
+        graphics.text(thisScore, SCORES_PADDING, Board.Y - 5);
+        graphics.textAlign(RIGHT);
+        graphics.textSize(20);
+        graphics.text(opponentUsername, Scrabble.WINDOW_WIDTH - SCORES_PADDING, 25);
+        graphics.textSize(30);
+        graphics.text(opponentScore, Scrabble.WINDOW_WIDTH - SCORES_PADDING, Board.Y - 5);
     }
 
     @Override
@@ -79,6 +100,8 @@ public class GameScreen implements Screen {
             }
 
             case "opponent_turn": {
+                int points = Integer.parseInt(data[0]);
+                opponentScore += points;
                 board.applyOpponentTurn(data);
                 return true;
             }

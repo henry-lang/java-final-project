@@ -5,6 +5,12 @@ import processing.core.PGraphics;
 import static processing.core.PConstants.CENTER;
 
 public class RandomWaitingScreen implements Screen {
+    private final String username;
+
+    public RandomWaitingScreen(String username) {
+        this.username = username;
+    }
+
     @Override
     public void onFrame(PGraphics graphics) {
         float screenCenter = Scrabble.WINDOW_WIDTH / 2.0f;
@@ -30,7 +36,7 @@ public class RandomWaitingScreen implements Screen {
                 String opponent = data[0];
                 Tile[] tiles = Parsing.parseTiles(data[1]);
                 boolean thisTurn = Boolean.parseBoolean(data[2]);
-                Scrabble.changeScreen(new GameScreen(opponent, tiles, thisTurn));
+                Scrabble.changeScreen(new GameScreen(username, opponent, tiles, thisTurn));
                 return true;
             }
             default: {
