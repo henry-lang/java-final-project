@@ -27,7 +27,6 @@ public class GameScreen implements Screen {
 
         rack = new TileRack(tiles);
         this.thisTurn = thisTurn;
-        System.out.println(thisTurn);
     }
 
     @Override
