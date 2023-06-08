@@ -11,11 +11,21 @@ public class WordPlacementInfo {
     public final boolean isValid;
     public final String invalidReason;
     public final ArrayList<WordPlacement> words;
+    public final int points;
 
     private WordPlacementInfo(boolean isValid, String invalidReason, ArrayList<WordPlacement> words) {
         this.isValid = isValid;
         this.invalidReason = invalidReason;
         this.words = words;
+        if(isValid) {
+            int points = 0;
+            for(WordPlacement word: words) {
+                points += word.pointValue;
+            }
+            this.points = points;
+        } else {
+            points = 0;
+        }
     }
 
     public static WordPlacementInfo valid(ArrayList<WordPlacement> words) {

@@ -5,6 +5,7 @@ import processing.core.PGraphics;
 public class TileRack {
     private final float TILE_SIZE = 45;
     private final float TILE_GAP = 10;
+    private final float Y = Scrabble.WINDOW_HEIGHT - TILE_SIZE - TILE_GAP;
 
     private final Tile[] tiles;
 
@@ -35,15 +36,15 @@ public class TileRack {
 
     public void draw(PGraphics graphics) {
         graphics.fill(230);
-        graphics.rect(50f, 525f, 400f, 50f, 15);
+        graphics.rect(50f, Y, 400f, 50f, 15);
         // TODO: refactor this
         for (int i = 0; i < tiles.length; i++) {
             if(tiles[i] == null) continue;
             float x = (TILE_SIZE * i) + 60 + (TILE_GAP * i);
             float xTxt = x + (TILE_SIZE / 2.0f);
-            float yTxt = 527.5f + (TILE_SIZE * 0.65f);
+            float yTxt = Y + 2.5f + (TILE_SIZE * 0.65f);
             graphics.fill(242, 173, 26);
-            graphics.rect(x, 527.5f, TILE_SIZE, TILE_SIZE, 10);
+            graphics.rect(x, Y + 2.5f, TILE_SIZE, TILE_SIZE, 10);
             graphics.fill(0);
             graphics.text(tiles[i].getLetter(), xTxt, yTxt);
         }
@@ -51,7 +52,7 @@ public class TileRack {
 
     private int getMouseIndex(float mouseX, float mouseY) {
         // TODO: stop hardcoding here lol
-        if(mouseY < 527.5f || mouseY > 527.5f + TILE_SIZE) return -1;
+        if(mouseY < Y + 2.5f || mouseY > Y + 2.5f + TILE_SIZE) return -1;
         float tileRatio = 1 - (TILE_GAP / (TILE_SIZE + TILE_GAP));
         float tileIndex = ((mouseX - 60) / (TILE_SIZE + TILE_GAP));
         if(tileIndex % 1 >= tileRatio || tileIndex < 0 || tileIndex >= tiles.length) return -1;

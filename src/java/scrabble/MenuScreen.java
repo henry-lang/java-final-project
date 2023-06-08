@@ -103,7 +103,8 @@ public class MenuScreen implements Screen {
             case "random_game_start": {
                 String opponent = data[0];
                 Tile[] tiles = Parsing.parseTiles(data[1]);
-                Scrabble.changeScreen(new GameScreen(opponent, tiles));
+                boolean thisTurn = Boolean.parseBoolean(data[2]);
+                Scrabble.changeScreen(new GameScreen(opponent, tiles, thisTurn));
                 return true;
             }
             case "create_fail": {

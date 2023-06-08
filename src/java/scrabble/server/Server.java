@@ -184,8 +184,10 @@ public class Server {
                     System.out.println("New client waiting for random game");
                 } else {
                     String id = generateGameID();
-                    GameInfo gameInfo = new GameInfo(id);
+                    GameInfo gameInfo = new GameInfo(id, randomWaiting, client);
                     games.put(id, gameInfo);
+                    clients.get(randomWaiting).gameID = id;
+                    clients.get(client).gameID = id;
                     // random_game_start:{username}:{tiles}:{their_turn}
                     send(randomWaiting, "random_game_start:" + info.username + ":" + gameInfo.getTileMessage(7) + ":true");
                     res = "random_game_start:" + clients.get(randomWaiting).username + ":" + gameInfo.getTileMessage(7) + ":false";
@@ -210,7 +212,7 @@ public class Server {
                 else if (info.state.equals(ClientState.IN_GAME)) res = "join_fail:in active game";
                 else if (invalidGameReq(split[1])) res = "join_fail:bad game request";
                 else {
-                    games.get(split[1]).addPlayer();
+                    games.get(split[1]).addPlayer(client);
                     info.state = ClientState.IN_GAME;
                     info.gameID = split[1];
                     res = "join_success";
@@ -231,8 +233,18 @@ public class Server {
             }
 
             case "turn": {
-                // TODO: come back to this one bc it's much more complicated
-                res = "turn_fail:not implemented";
+                ClientInfo info = clients.get(client);
+                if(info.state != ClientState.IN_GAME) {
+                    res = "turn_fail:not in active game";
+                    break;
+                }
+
+                int numTiles = split.length - 2;
+                GameInfo game = games.get(info.gameID);
+                res = "turn_success:" + game.getTileMessage(numTiles);
+                int start = msg.indexOf(':');
+                send(game.getOpponent(client), "opponent_turn:" + msg.substring(start + 1));
+
                 break;
             }
 
@@ -258,8 +270,5 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-    private static void broadcast(String msg) {
-        for (SocketChannel client : clients.keySet()) send(client, msg);
     }
 }

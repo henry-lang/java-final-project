@@ -3,10 +3,13 @@ package scrabble;
 import processing.core.PGraphics;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import static scrabble.Multiplier.*;
 
 public class Board {
+
+    public static final float Y = 65f;
     public static final int SIZE = 15;
     public static final int CENTER = SIZE / 2;
     public static final float BOARD_SPACING = ((float) Scrabble.WINDOW_WIDTH) / SIZE;
@@ -35,6 +38,8 @@ public class Board {
     // For now, null in the array indicates that the tile is empty
     // Unfortunately, java doesn't have good enum types like Rust where Option<Tile> is possible
     private final Tile[][] tiles = new Tile[SIZE][SIZE];
+    private boolean boardChanged = true;
+    private WordPlacementInfo wordPlacement = null;
 
     private boolean isFirstMove() {
         return tiles[CENTER][CENTER] == null;
@@ -64,7 +69,7 @@ public class Board {
 
     private int getMouseRow(float mouseY) {
         float tileRatio = 1 - (TILE_GAPS / (TILE_SIZE + TILE_GAPS));
-        float row = ((mouseY) / (TILE_SIZE + TILE_GAPS));
+        float row = ((mouseY - Y) / (TILE_SIZE + TILE_GAPS));
         if(row % 1 >= tileRatio || row < 0 || row >= tiles.length) return -1;
         return (int) row;
     }
@@ -76,6 +81,7 @@ public class Board {
         if(col != -1 && row != -1 && tiles[row][col] != null && !tiles[row][col].isFinalized()) {
             Tile tile = tiles[row][col];
             tiles[row][col] = null;
+            boardChanged = true;
             return tile;
         } else {
             return null;
@@ -88,6 +94,7 @@ public class Board {
 
         if(col != -1 && row != -1 && tiles[row][col] == null) {
             tiles[row][col] = tile;
+            boardChanged = true;
             return true;
         } else {
             return false;
@@ -205,6 +212,7 @@ public class Board {
         return WordPlacementInfo.valid(words);
     }
     public WordPlacementInfo checkWordPlacement() {
+        if(!boardChanged) return wordPlacement;
 
         if(!anyTilesPlaced()) {
             return WordPlacementInfo.INVALID_NO_TILES;
@@ -240,9 +248,9 @@ public class Board {
             StringBuilder wordBuilder = new StringBuilder();
             for (int row = startRow; row <= endRow; row++) {
                 extendedWord = extendWord(true, lineInfo.startCol, lineInfo.endCol, row);
-                WordPlacementInfo wpInfo = validateSubWord(false, extendedWord[0], extendedWord[1], row);
-                if (!wpInfo.isValid) return wpInfo;
-                else pointValue += wpInfo.words.get(0).pointValue; // prolly not the behavior we want but oh well
+//                WordPlacementInfo wpInfo = validateSubWord(false, extendedWord[0], extendedWord[1], row);
+//                if (!wpInfo.isValid) return wpInfo;
+//                else pointValue += wpInfo.words.get(0).pointValue; // prolly not the behavior we want but oh well
 
                 Tile tile = tiles[row][col];
                 int[] multis = getMultipliers(tile, multipliers[row][col]);
@@ -265,13 +273,61 @@ public class Board {
         System.out.println(lineInfo.horizontal + " " + lineInfo.startRow + " " + lineInfo.startCol + " " + lineInfo.endRow + " " + lineInfo.endCol);
 
         words.sort(Comparator.comparingInt(word -> word.pointValue));
-        return WordPlacementInfo.valid(words);
+        wordPlacement = WordPlacementInfo.valid(words);
+        boardChanged = false;
+
+        return wordPlacement;
+    }
+
+    public String getTurnMessage() {
+        StringBuilder msg = new StringBuilder();
+        msg.append("turn:");
+        msg.append(wordPlacement.points);
+        for(int r = 0; r < SIZE; r++) {
+            for(int c = 0; c < SIZE; c++) {
+                if(tiles[r][c] != null && !tiles[r][c].isFinalized()) {
+                    msg.append(':');
+                    msg.append(tiles[r][c].isBlank() ? '_' : tiles[r][c].getLetter());
+                    msg.append(',');
+                    msg.append(r);
+                    msg.append(',');
+                    msg.append(c);
+                }
+            }
+        }
+        System.out.println(msg);
+        return msg.toString();
+    }
+
+    public void applyOpponentTurn(String[] data) {
+        for(int i = 1; i < data.length; i++) {
+            String[] attrs = data[i].split(",");
+            char c = attrs[0].charAt(0);
+            int row = Integer.parseInt(attrs[1]);
+            int col = Integer.parseInt(attrs[2]);
+            if(c == '_') {
+                tiles[row][col] = new Tile(' ', true);
+            } else {
+                tiles[row][col] = new Tile(c, 9, false);
+            }
+            tiles[row][col].makeFinalized();
+        }
+    }
+
+    public void finalizeTurn() {
+        for(int r = 0; r < SIZE; r++) {
+            for(int c = 0; c < SIZE; c++) {
+                if(tiles[r][c] != null && !tiles[r][c].isFinalized()) {
+                    tiles[r][c].makeFinalized();
+                }
+            }
+        }
     }
 
     public void draw(PGraphics graphics) {
         graphics.noStroke();
         graphics.fill(200);
-        graphics.rect(0, 0, graphics.width, graphics.width);
+        graphics.rect(0, Y, graphics.width, graphics.width);
 
         for(int i = 0; i < SIZE; i++) {
             for(int j = 0; j < SIZE; j++) {
@@ -280,7 +336,7 @@ public class Board {
                 Color color = multiplier.getColor();
 
                 float x = j * BOARD_SPACING + TILE_GAPS / 2;
-                float y = i * BOARD_SPACING + TILE_GAPS / 2;
+                float y = i * BOARD_SPACING + TILE_GAPS / 2 + Y;
                 float textX = x + TILE_SIZE / 2;
                 float textY = y + TILE_SIZE * 0.7f;
 

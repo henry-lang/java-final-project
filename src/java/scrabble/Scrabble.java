@@ -13,12 +13,11 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Scrabble extends PApplet {
     public static final int WINDOW_WIDTH = 500;
-    public static final int WINDOW_HEIGHT = 600;
+    public static final int WINDOW_HEIGHT = 665;
 
     private static final String SERVER_HOST = "localhost";
     private static final int SERVER_PORT = 8080;
@@ -64,24 +63,6 @@ public class Scrabble extends PApplet {
 
     public static void changeScreen(Screen screen) {
         Scrabble.screen = screen;
-    }
-
-    public static void openCmdThread() { // to be used for development
-        new Thread(() -> {
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("Enter a username: ");
-            String input = "logon:" + scanner.nextLine();
-            sendMessage(input);
-            while (true) {
-                System.out.print("Enter an event to send (or 'quit' to exit): ");
-                input = scanner.nextLine();
-                if (input.equalsIgnoreCase("quit")) {
-                    System.exit(0);
-                }
-
-                sendMessage(input);
-            }
-        }).start();
     }
 
     public static void startReception() {

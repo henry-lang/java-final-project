@@ -1,5 +1,6 @@
 package scrabble.server;
 
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -8,14 +9,22 @@ public class GameInfo {
     private static final int[] BAG_FREQUENCIES = {2, 13, 9, 8, 8, 7, 6, 5, 5, 5, 4, 4, 4, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1};
 
     public String id;
+
+    public SocketChannel playerOne;
+    public SocketChannel playerTwo;
+
+    public int turn = 1;
+
     public boolean maxPlayers;
     private int players;
 
     private final ArrayList<Character> tileBag = new ArrayList<>();
 
-    public GameInfo(String id) {
+    public GameInfo(String id, SocketChannel playerOne, SocketChannel playerTwo) {
         this.id = id;
         this.maxPlayers = false;
+        this.playerOne = playerOne;
+        this.playerTwo = playerTwo;
 
         for(int i = 0; i < BAG_LETTERS.length; i++) {
             for(int j = 0; j < BAG_FREQUENCIES[i]; j++) {
@@ -25,8 +34,17 @@ public class GameInfo {
         Collections.shuffle(tileBag);
     }
 
-    public void addPlayer() {
+    public GameInfo(String id) {
+        this(id, null, null);
+    }
+
+    public void addPlayer(SocketChannel player) {
         players++;
+        if(players == 1) {
+            playerOne = player;
+        } else {
+            playerTwo = player;
+        }
         if (players == 2) maxPlayers = true;
     }
 
@@ -47,6 +65,16 @@ public class GameInfo {
         }
 
         return msg.toString();
+    }
+
+    public SocketChannel getOpponent(SocketChannel client) {
+        if(client == playerOne) {
+            return playerTwo;
+        } else if(client == playerTwo) {
+            return playerOne;
+        } else {
+            return null;
+        }
     }
 
     public char getTile() {
