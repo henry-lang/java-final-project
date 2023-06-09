@@ -236,6 +236,7 @@ public class Board {
         words.add(new WordPlacement(word, pts));
         return WordPlacementInfo.valid(words);
     }
+
     public WordPlacementInfo checkWordPlacement() {
         if(!boardChanged) return wordPlacement;
 

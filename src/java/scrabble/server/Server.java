@@ -22,6 +22,7 @@ public class Server {
 
     private static final ByteBuffer lengthBuffer = ByteBuffer.allocate(Integer.BYTES);
 
+    // Generate a random GAME_ID_LENGTH game id that isn't in use
     public static String generateGameID() {
         while(true) {
             char[] chars = new char[GAME_ID_LENGTH];

@@ -12,7 +12,6 @@ public class MenuScreen implements Screen {
     @Override
     public void onFrame(PGraphics graphics) {
         float screenCenter = Scrabble.WINDOW_WIDTH / 2.0f;
-        float screenHeight = Scrabble.WINDOW_HEIGHT;
 
         graphics.background(Color.MENU_COLOR.r, Color.MENU_COLOR.g, Color.MENU_COLOR.b);
         graphics.fill(255, 61, 61);
@@ -36,9 +35,7 @@ public class MenuScreen implements Screen {
         graphics.textAlign(CENTER);
         graphics.fill(255);
         graphics.stroke(255);
-        graphics.line(screenCenter, 200, screenCenter, screenHeight);
-        graphics.text("Random Game", screenCenter / 2, 300);
-        graphics.text("Private Game", screenCenter + screenCenter / 2, 300);
+        graphics.text("Random Game", screenCenter, 300);
 
         // Draw the die icon
         graphics.stroke(0); // Set outline color to black
@@ -61,27 +58,6 @@ public class MenuScreen implements Screen {
         graphics.ellipse(dotX + dotSpacing, dotY + dotSpacing, dotSize, dotSize);  // Center dot
         graphics.ellipse(dotX, dotY + 2 * dotSpacing, dotSize, dotSize);  // Bottom-left dot
         graphics.ellipse(dotX + 2 * dotSpacing, dotY + 2 * dotSpacing, dotSize, dotSize);  // Bottom-right dot
-
-        // Draw the "Create" button
-        graphics.rect(screenCenter + 50, 250, 100, 40);
-        graphics.textSize(16);
-        graphics.fill(255);
-        graphics.textAlign(CENTER, CENTER);
-        graphics.text("Create", screenCenter + 100, 270);
-
-        // Draw the "Enter game code" textbox
-        graphics.rect(screenCenter + 50, 320, 200, 40);
-        graphics.fill(0);
-        graphics.textSize(16);
-        graphics.textAlign(CENTER, CENTER);
-        graphics.text("Enter game code", screenCenter + 150, 340);
-
-        // Draw the "Join" button
-        graphics.rect(screenCenter + 50, 380, 100, 40);
-        graphics.textSize(16);
-        graphics.fill(255);
-        graphics.textAlign(CENTER, CENTER);
-        graphics.text("Join", screenCenter + 100, 400);
     }
 
     @Override
