@@ -180,7 +180,7 @@ public class Board {
 
     private int[] extendWord(boolean horizontal, int start, int end, int rc) {
         // note: rc means row/column. it's just the other value needed to access the 2d array
-        if (horizontal) {
+        if (!horizontal) {
             while (start > 0 && tiles[start - 1][rc] != null) start -= 1;
             while (end < SIZE - 1 && tiles[end + 1][rc] != null) end += 1;
         } else {
@@ -194,7 +194,7 @@ public class Board {
 
     int[] getMultipliers(Tile tile, Multiplier multiplier) {
         int[] multipliers = new int[]{1, 1};
-        if (tile.isFinalized()) return multipliers;
+        if (tile == null || tile.isFinalized()) return multipliers;
         switch (multiplier) {
             case DL: { multipliers[0] = 2; break; }
             case TL: { multipliers[0] = 3; break; }
@@ -268,12 +268,20 @@ public class Board {
             int[] extendedWord = extendWord(false, lineInfo.startRow, lineInfo.endRow, col);
             int startRow = extendedWord[0];
             int endRow = extendedWord[1];
+//            for (int row = startRow)
+            // System.out.println(startRow + " " + endRow + tiles[startRow][col].getLetter() + " " + tiles[endRow][col].getLetter());
 
             int pointValue = 0;
             int wordMultiplier = 1;
             StringBuilder wordBuilder = new StringBuilder();
             for (int row = startRow; row <= endRow; row++) {
+
                 extendedWord = extendWord(true, lineInfo.startCol, lineInfo.endCol, row);
+                int sr = extendedWord[0];
+                int er = extendedWord[1];
+                if (tiles[sr][col] != null && tiles[er][col] != null) {
+                    System.out.println(startRow + " " + endRow + tiles[sr][col].getLetter() + " " + tiles[er][col].getLetter());
+                }
 //                WordPlacementInfo wpInfo = validateSubWord(false, extendedWord[0], extendedWord[1], row);
 //                if (!wpInfo.isValid) return wpInfo;
 //                else pointValue += wpInfo.words.get(0).pointValue; // prolly not the behavior we want but oh well
@@ -285,10 +293,10 @@ public class Board {
                 wordBuilder.append(tile.getLetter());
             }
 
-
             pointValue *= wordMultiplier;
 
             String word = wordBuilder.toString();
+            System.out.println("word: " + word);
             if(!Scrabble.getDictionary().contains(word)) {
                 return WordPlacementInfo.invalidWord(word);
             }

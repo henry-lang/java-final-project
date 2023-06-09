@@ -30,7 +30,7 @@ public class Dictionary {
 
     // Check if the dictionary contains this word
     public boolean contains(String word) {
-        return words.contains(word);
+        return words.contains(word.toLowerCase());
     }
 
     // Return the size of the dictionary

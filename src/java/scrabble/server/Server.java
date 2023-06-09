@@ -155,10 +155,12 @@ public class Server {
                     GameInfo gameInfo = new GameInfo(id, randomWaiting, client);
                     games.put(id, gameInfo);
                     clients.get(randomWaiting).gameID = id;
-                    clients.get(client).gameID = id;
+                    info.gameID = id;
+                    info.state = ClientState.IN_GAME;
                     // random_game_start:{username}:{tiles}:{their_turn}
                     send(randomWaiting, "random_game_start:" + info.username + ":" + gameInfo.getTileMessage(7) + ":true");
                     res = "random_game_start:" + clients.get(randomWaiting).username + ":" + gameInfo.getTileMessage(7) + ":false";
+                    randomWaiting = null;
                 }
                 break;
             }
