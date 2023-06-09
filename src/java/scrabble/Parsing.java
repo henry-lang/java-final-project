@@ -7,13 +7,8 @@ public abstract class Parsing {
 
         for (int i = 0; i < tileStrings.length; i++) {
             String tileString = tileStrings[i];
-
-            if (tileString.equals("_")) {
-                parsedTiles[i] = new Tile(' ', true);
-            } else {
-                char letter = tileString.charAt(0);
-                parsedTiles[i] = new Tile(letter, false);
-            }
+            char letter = tileString.charAt(0);
+            parsedTiles[i] = new Tile(letter);
         }
 
         return parsedTiles;

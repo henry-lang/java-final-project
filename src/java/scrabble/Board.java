@@ -3,7 +3,6 @@ package scrabble;
 import processing.core.PGraphics;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import static scrabble.Multiplier.*;
 
@@ -287,7 +286,7 @@ public class Board {
             for(int c = 0; c < SIZE; c++) {
                 if(tiles[r][c] != null && !tiles[r][c].isFinalized()) {
                     msg.append(':');
-                    msg.append(tiles[r][c].isBlank() ? '_' : tiles[r][c].getLetter());
+                    msg.append(tiles[r][c].getLetter());
                     msg.append(',');
                     msg.append(r);
                     msg.append(',');
@@ -305,11 +304,7 @@ public class Board {
             char c = attrs[0].charAt(0);
             int row = Integer.parseInt(attrs[1]);
             int col = Integer.parseInt(attrs[2]);
-            if(c == '_') {
-                tiles[row][col] = new Tile(' ', true);
-            } else {
-                tiles[row][col] = new Tile(c, 9, false);
-            }
+            tiles[row][col] = new Tile(c);
             tiles[row][col].makeFinalized();
         }
     }

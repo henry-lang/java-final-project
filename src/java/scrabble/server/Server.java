@@ -115,45 +115,12 @@ public class Server {
             System.out.println("Received message from " + clientChannel.getRemoteAddress() + ": " + msg);
             parseMessage(msg, clientChannel);
         }
-
-//        var message = new String(data);
-
-//        System.out.println("Received from client " + clientChannel.getRemoteAddress() + ": " + message);
-
-        // Echo the message back to the client
-//        clientChannel.write(ByteBuffer.wrap(data));
-    }
-
-    private static boolean isUsernameInUse(String username, SocketChannel client) {
-        for (ClientInfo info: clients.values()) {
-            if (!info.equals(clients.get(client)) && info.username != null && info.username.equals(username)) return true;
-            //  ^^ not checking same client          ^^ username exists       ^^ username == username
-        }
-        return false;
-    }
-
-    private static boolean invalidGameReq(String id) {
-        for (String gameID : games.keySet()) {
-            if (gameID.equals(id)) {
-                return games.get(gameID).maxPlayers;
-            }
-        }
-        return false;
     }
 
     private static void parseMessage(String msg, SocketChannel client) {
         String[] split = msg.split(":");
         String res = null;
         switch (split[0]) { // Refer to documentation for message parsing.
-            case "logon": {
-                if (isUsernameInUse(split[1], client)) res = "logon_fail:username in use";
-                else {
-                    clients.get(client).username = split[1];
-                    res = "logon_success";
-                }
-                break;
-            }
-
             case "create": {
                 // generate game id; return success
                 // no reason for this to fail tbh
@@ -180,7 +147,7 @@ public class Server {
                 if(randomWaiting == null) {
                     randomWaiting = client;
                     clients.get(randomWaiting).state = ClientState.IN_GAME;
-                    res = "waiting";
+                    res = "random_waiting";
                     System.out.println("New client waiting for random game");
                 } else {
                     String id = generateGameID();
@@ -189,33 +156,16 @@ public class Server {
                     clients.get(randomWaiting).gameID = id;
                     clients.get(client).gameID = id;
                     // random_game_start:{username}:{tiles}:{their_turn}
-                    send(randomWaiting, "game_start:" + info.username + ":" + gameInfo.getTileMessage(7) + ":true");
-                    res = "game_start:" + clients.get(randomWaiting).username + ":" + gameInfo.getTileMessage(7) + ":false";
+                    send(randomWaiting, "random_game_start:" + info.username + ":" + gameInfo.getTileMessage(7) + ":true");
+                    res = "random_game_start:" + clients.get(randomWaiting).username + ":" + gameInfo.getTileMessage(7) + ":false";
                 }
                 break;
             }
 
-            case "waiting_cancel": {
+            case "random_cancel": {
                 if(client.equals(randomWaiting)) {
                     randomWaiting = null;
                     clients.get(client).state = ClientState.CONNECTED;
-                }
-                break;
-            }
-
-            case "join": {
-                // if (idNonexistent(split[1])) res = "join_fail:id nonexistent";
-                // else if (gameInProgress(split[1])) res = "join_fail:game in progress";
-//                System.out.println(clients.get(client).state + " " + clients.get(client).state.equals(ClientState.IN_GAME));
-                ClientInfo info = clients.get(client);
-                if (split.length == 1) res = "join_fail:no join code";
-                else if (info.state.equals(ClientState.IN_GAME)) res = "join_fail:in active game";
-                else if (invalidGameReq(split[1])) res = "join_fail:bad game request";
-                else {
-                    games.get(split[1]).addPlayer(client);
-                    info.state = ClientState.IN_GAME;
-                    info.gameID = split[1];
-                    res = "join_success";
                 }
                 break;
             }

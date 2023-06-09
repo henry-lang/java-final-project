@@ -52,7 +52,7 @@ public class WaitingScreen implements Screen {
         float mouseY = Scrabble.getWindow().mouseY;
 
         if(mouseX > screenCenter - 80 && mouseX < screenCenter + 80 && mouseY > 300 && mouseY < 380) {
-            Scrabble.sendMessage("waiting_cancel");
+            Scrabble.sendMessage("random_cancel");
             Scrabble.changeScreen(new MenuScreen());
         }
     }

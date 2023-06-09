@@ -3,23 +3,42 @@ package scrabble;
 import processing.core.PGraphics;
 
 public class Tile {
+    private static final int[] POINT_VALUES = {
+            1, // A
+            3, // B
+            3, // C
+            2, // D
+            1, // E
+            4, // F
+            2, // G
+            4, // H
+            1, // I
+            8, // J
+            5, // K
+            1, // L
+            3, // M
+            1, // N
+            1, // O
+            3, // P
+            10, // Q
+            1, // R
+            1, // S
+            1, // T
+            1, // U
+            4, // V
+            4, // W
+            8, // X
+            4, // Y
+            10 // Z
+    };
+
     private final char letter;
-    private final int value;
-    private final boolean isBlank;
 
     // Whether this tile is incorporated onto the board or is temporarily placed down
     private boolean isFinalized = false;
 
-    public Tile(char letter, int value, boolean isBlank) {
+    public Tile(char letter) {
         this.letter = Character.toUpperCase(letter);
-        this.value = value;
-        this.isBlank = isBlank;
-    }
-
-    public Tile(char letter, boolean isBlank) {
-        this.letter = Character.toUpperCase(letter);
-        this.value = 0;
-        this.isBlank = isBlank;
     }
 
     public void makeFinalized() {
@@ -27,11 +46,7 @@ public class Tile {
     }
 
     public int getValue() {
-        return value;
-    }
-
-    public boolean isBlank() {
-        return isBlank;
+        return POINT_VALUES[letter - 'A'];
     }
 
     public char getLetter() {
@@ -40,10 +55,5 @@ public class Tile {
 
     public boolean isFinalized() {
         return isFinalized;
-    }
-
-    // TODO: FINISH THIS METHOD SO THE CODE IS MORE MANAGEABLE
-    public void draw(PGraphics graphics, float x, float y, float size) {
-
     }
 }

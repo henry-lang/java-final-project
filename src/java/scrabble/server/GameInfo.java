@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class GameInfo {
-    private static final char[] BAG_LETTERS = {'_', 'e', 'a', 'i', 'o', 't', 'r', 's', 'd', 'n', 'l', 'u', 'h', 'g', 'y', 'b', 'c', 'f', 'm', 'p', 'w', 'v', 'k', 'x', 'j', 'q', 'z'};
-    private static final int[] BAG_FREQUENCIES = {2, 13, 9, 8, 8, 7, 6, 5, 5, 5, 4, 4, 4, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1};
+    private static final char[] BAG_LETTERS = {'e', 'a', 'i', 'o', 't', 'r', 's', 'd', 'n', 'l', 'u', 'h', 'g', 'y', 'b', 'c', 'f', 'm', 'p', 'w', 'v', 'k', 'x', 'j', 'q', 'z'};
+    private static final int[] BAG_FREQUENCIES = {13, 9, 8, 8, 7, 6, 5, 5, 5, 4, 4, 4, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1};
 
     public String id;
 
