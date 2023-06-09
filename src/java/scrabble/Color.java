@@ -4,8 +4,13 @@ package scrabble;
 public class Color {
     public static final Color MENU_COLOR = new Color(66, 170, 255);
 
+    // Red component of the color, range 0-255
     public int r;
+
+    // Green component of the color, range 0-255
     public int g;
+
+    // Blue component of the color, range 0-255
     public int b;
 
     public Color(int r, int g, int b) {

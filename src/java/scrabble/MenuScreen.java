@@ -5,16 +5,9 @@ import processing.core.PGraphics;
 import static processing.core.PConstants.*;
 
 public class MenuScreen implements Screen {
-    enum SelectedTextBox {
-        NONE,
-        USERNAME,
-        GAME_CODE
-    }
-
     private static String username = "";
-    private String gameCode = "";
     private String errorMessage = "";
-    private SelectedTextBox selectedTextBox;
+    private boolean editingUsername = false;
 
     @Override
     public void onFrame(PGraphics graphics) {
@@ -37,7 +30,7 @@ public class MenuScreen implements Screen {
         graphics.fill(0);
         graphics.textAlign(LEFT);
         graphics.text(username, screenCenter - 95, 100 + 40 * 0.8f);
-        if(selectedTextBox == SelectedTextBox.USERNAME) {
+        if(editingUsername) {
             graphics.rect(screenCenter - 94 + graphics.textWidth(username), 105, 3, 30);
         }
         graphics.textAlign(CENTER);
@@ -123,7 +116,7 @@ public class MenuScreen implements Screen {
         float mouseY = Scrabble.getWindow().mouseY;
         float screenCenter = Scrabble.WINDOW_WIDTH / 2.0f;
         if(mouseX >= screenCenter - 100 && mouseX <= screenCenter + 100 && mouseY >= 100 && mouseY <= 140) {
-            selectedTextBox = SelectedTextBox.USERNAME;
+            editingUsername = true;
         } else if(mouseX >= 50 && mouseX <= screenCenter - 50 && mouseY >= 350 && mouseY <= 250 + screenCenter) {
             if(username.isEmpty()) {
                 errorMessage = "Error: No username";
@@ -131,7 +124,7 @@ public class MenuScreen implements Screen {
                 Scrabble.sendMessage("random:" + username);
             }
         } else {
-            selectedTextBox = SelectedTextBox.NONE;
+            editingUsername = false;
         }
     }
 
@@ -139,26 +132,13 @@ public class MenuScreen implements Screen {
     public void keyPressed(char key, int keyCode) {
         boolean isValidChar = Character.isAlphabetic(key) || Character.isDigit(key) || key == ' ';
 
-        switch(selectedTextBox) {
-            case USERNAME: {
-                if(isValidChar) {
-                    username += key;
-                } else if(key == '\b') {
-                    if(username.length() > 0) {
-                        username = username.substring(0, username.length() - 1);
-                    }
+        if(editingUsername) {
+            if(isValidChar) {
+                username += key;
+            } else if(key == '\b') {
+                if(username.length() > 0) {
+                    username = username.substring(0, username.length() - 1);
                 }
-                break;
-            }
-            case GAME_CODE: {
-                if(isValidChar) {
-                    gameCode += key;
-                } else if(key == '\b') {
-                    if(gameCode.length() > 0) {
-                        gameCode = gameCode.substring(0, gameCode.length() - 1);
-                    }
-                }
-                break;
             }
         }
     }

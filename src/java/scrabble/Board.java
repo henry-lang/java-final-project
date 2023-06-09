@@ -8,14 +8,28 @@ import static scrabble.Multiplier.*;
 
 public class Board {
 
+    // What Y the board starts on
     public static final float Y = 65f;
+
+    // The size of the board in squares
     public static final int SIZE = 15;
+
+    // The center index of the board
     public static final int CENTER = SIZE / 2;
+
+    // Spacing in pixels of a whole tile, including the gaps
     public static final float BOARD_SPACING = ((float) Scrabble.WINDOW_WIDTH) / SIZE;
+
+    // The size of actual tiles on the board
     public static final float TILE_SIZE = BOARD_SPACING * 0.85f;
+
+    // The gaps between tiles in pixels
     public static final float TILE_GAPS = BOARD_SPACING - TILE_SIZE;
+
+    // Corner radius of tiles
     public static final float TILE_RADIUS = TILE_SIZE * 0.15f;
 
+    // Multipliers on the board
     public static final Multiplier[][] multipliers = {
             {NONE, NONE, NONE, TW, NONE, NONE, TL, NONE, TL, NONE, NONE, TW, NONE, NONE, NONE},
             {NONE, NONE, DL, NONE, NONE, DW, NONE, NONE, NONE, DW, NONE, NONE, DL, NONE, NONE},
@@ -37,13 +51,19 @@ public class Board {
     // For now, null in the array indicates that the tile is empty
     // Unfortunately, java doesn't have good enum types like Rust where Option<Tile> is possible
     private final Tile[][] tiles = new Tile[SIZE][SIZE];
+
+    // If the board has been changed since the last turn calculation
     private boolean boardChanged = true;
+
+    // The cached WordPlacementInfo from the last calculation
     private WordPlacementInfo wordPlacement = null;
 
+    // Returns if this current turn is the first turn on the board - (if the center square is null)
     private boolean isFirstMove() {
         return tiles[CENTER][CENTER] == null;
     }
 
+    // Returns if any not finalized tiles are placed on the board
     private boolean anyTilesPlaced() {
         boolean isPlaced = false;
         outer:
@@ -59,6 +79,7 @@ public class Board {
         return isPlaced;
     }
 
+    // Returns what column of the board the mouse is over, and -1 if it's outside or in gaps
     private int getMouseColumn(float mouseX) {
         float tileRatio = 1 - (TILE_GAPS / (TILE_SIZE + TILE_GAPS));
         float column = ((mouseX) / (TILE_SIZE + TILE_GAPS));
@@ -66,6 +87,7 @@ public class Board {
         return (int) column;
     }
 
+    // Returns what row of the board the mouse is over, and -1 if it's outside or in gaps
     private int getMouseRow(float mouseY) {
         float tileRatio = 1 - (TILE_GAPS / (TILE_SIZE + TILE_GAPS));
         float row = ((mouseY - Y) / (TILE_SIZE + TILE_GAPS));
@@ -87,6 +109,7 @@ public class Board {
         }
     }
 
+    // Try to drop the tile, and return whether it was successful
     public boolean tryDrop(float mouseX, float mouseY, Tile tile) {
         int col = getMouseColumn(mouseX);
         int row = getMouseRow(mouseY);
@@ -100,6 +123,7 @@ public class Board {
         }
     }
 
+    // Checks if all the tiles placed are either on the same horizontal or vertical
     private TileLineInfo tilesInStraightLine() {
         int startRow = -1;
         int startCol = -1;
@@ -141,6 +165,7 @@ public class Board {
         return new TileLineInfo(true, horizontal, startRow, startCol, lastRow, lastCol);
     }
 
+    // Check if the line where the tiles are placed contains any gaps
     private boolean checkForGapsInLine(TileLineInfo lineInfo) {
         for(int r = lineInfo.startRow; r <= lineInfo.endRow; r++) {
             for(int c = lineInfo.startCol; c <= lineInfo.endCol; c++) {
@@ -165,6 +190,7 @@ public class Board {
 
         return new int[]{start, end};
     }
+
 
     int[] getMultipliers(Tile tile, Multiplier multiplier) {
         int[] multipliers = new int[]{1, 1};
@@ -278,6 +304,7 @@ public class Board {
         return wordPlacement;
     }
 
+    // Get the turn message to send to the server, which just includes all the tiles added to the board in letter, row, column format
     public String getTurnMessage() {
         StringBuilder msg = new StringBuilder();
         msg.append("turn:");
@@ -298,6 +325,7 @@ public class Board {
         return msg.toString();
     }
 
+    // Apply the opponent's server turn message to the board
     public void applyOpponentTurn(String[] data) {
         for(int i = 1; i < data.length; i++) {
             String[] attrs = data[i].split(",");
@@ -309,6 +337,7 @@ public class Board {
         }
     }
 
+    // Finalize the current turn onto the board (finish the turn board-side)
     public void finalizeTurn() {
         for(int r = 0; r < SIZE; r++) {
             for(int c = 0; c < SIZE; c++) {
@@ -319,6 +348,7 @@ public class Board {
         }
     }
 
+    // Render the board onto the screen
     public void draw(PGraphics graphics) {
         graphics.noStroke();
         graphics.fill(200);
