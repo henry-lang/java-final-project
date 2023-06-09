@@ -104,7 +104,7 @@ public class GameScreen implements Screen {
     @Override
     public boolean handleMessage(String type, String[] data) {
         switch(type) {
-            // Our turn was validated by the server and therefore we can finalize it on the board and add points to our
+            // Our turn was validated by the server, and therefore we can finalize it on the board and add points to our
             // score
             case "turn_success": {
                 thisTurn = false;
@@ -117,14 +117,14 @@ public class GameScreen implements Screen {
                 return true;
             }
 
-            // Our turn was deemed bad by the server so we can't really do much but we'll log it for now
+            // Our turn was deemed bad by the server, so we can't really do much, but we'll log it for now
             case "turn_fail": {
                 // TODO: i don't think there's too much we can do here to notify the user, i mean it's not their fault
                 System.out.println("Failed submitting seemingly valid turn: " + data[0]);
                 return true;
             }
 
-            // The opponent submitted a turn and the server sent it to us so we need to place it on the board
+            // The opponent submitted a turn and the server sent it to us, so we need to place it on the board
             case "opponent_turn": {
                 // It's our turn now
                 thisTurn = true;

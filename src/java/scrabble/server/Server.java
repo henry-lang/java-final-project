@@ -12,14 +12,25 @@ import java.util.Iterator;
 import java.util.Random;
 
 public class Server {
+    // The port to run the server on
     private static final int PORT = 8080;
+
+    // The length of the generated game ids
     private static final int GAME_ID_LENGTH = 6;
 
+    // All the games that are currently running: gameID -> info about the game
     private static final HashMap<String, GameInfo> games = new HashMap<>();
+
+    // The client who is currently waiting for someone else to want to play
     private static SocketChannel randomWaiting;
+
+    // All the clients that are currently connected, corresponding to info about them (their state)
     private static final HashMap<SocketChannel, ClientInfo> clients = new HashMap<>();
+
+    // The server's random number generator
     private static final Random random = new Random();
 
+    // Similarly to the client, this avoids a temporary allocation by reusing the same buffer for the length integer
     private static final ByteBuffer lengthBuffer = ByteBuffer.allocate(Integer.BYTES);
 
     // Generate a random GAME_ID_LENGTH game id that isn't in use
@@ -41,6 +52,7 @@ public class Server {
 
     public static void main(String[] args) {
         try {
+            // Boilerplate server initialization code
             Selector selector = Selector.open();
 
             ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
@@ -55,26 +67,32 @@ public class Server {
 
                 if(readyChannels == 0) continue;
 
+                // Get all the clients that need processing
                 Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
 
                 while(keyIterator.hasNext()) {
                     SelectionKey key = keyIterator.next();
 
+                    // A client has just connected, and we need to initialize them
                     if (key.isAcceptable()) {
                         ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
                         SocketChannel clientChannel = serverChannel.accept();
                         clientChannel.configureBlocking(false);
                         clientChannel.register(selector, SelectionKey.OP_READ);
 
+                        // Give them initial state in the clients map
                         clients.put(clientChannel, new ClientInfo(ClientState.CONNECTED));
 
                         System.out.println("New client connected: " + clientChannel.getRemoteAddress());
                     }
+                    // A client has sent data
                     if (key.isReadable()) {
                         SocketChannel clientChannel = (SocketChannel) key.channel();
                         try {
+                            // Try to read data from the client
                             readFromClient(clientChannel);
                         } catch(IOException e) {
+                            // The client has disconnected
                             System.out.println("Client disconnected");
                             if(clientChannel.equals(randomWaiting)) {
                                 randomWaiting = null;
@@ -92,6 +110,7 @@ public class Server {
         }
     }
 
+    // Read a message from the client and handle it
     private static void readFromClient(SocketChannel clientChannel) throws IOException {
         System.out.println("Reading message...");
         lengthBuffer.clear();
@@ -105,6 +124,7 @@ public class Server {
             return;
         }
 
+        // If we read the length successfully, get the message into a String
         if (lengthBuffer.position() == Integer.BYTES) {
             lengthBuffer.flip();
             int messageSize = lengthBuffer.getInt();
@@ -118,26 +138,14 @@ public class Server {
         }
     }
 
+    // Parse the message that the user sent and actually handle it
     private static void parseMessage(String msg, SocketChannel client) {
+        // The parts of the message, separated by :
         String[] split = msg.split(":");
+        // The optional response to send back to the client
         String res = null;
         switch (split[0]) { // Refer to documentation for message parsing.
-            case "create": {
-                // generate game id; return success
-                // no reason for this to fail tbh
-                ClientInfo info = clients.get(client);
-                if(info.state != ClientState.CONNECTED) {
-                    res = "create_fail:already in game or waiting";
-                    break;
-                }
-                String id = generateGameID();
-                games.put(id, new GameInfo(id));
-                info.state = ClientState.IN_GAME;
-                info.gameID = id;
-                res = "create_success:" + id;
-                break;
-            }
-
+            // Player wants to join a random game
             case "random": {
                 ClientInfo info = clients.get(client);
                 if(info.state != ClientState.CONNECTED) {
@@ -165,6 +173,7 @@ public class Server {
                 break;
             }
 
+            // Player wants to cancel their waiting in the random queue
             case "random_cancel": {
                 if(client.equals(randomWaiting)) {
                     randomWaiting = null;

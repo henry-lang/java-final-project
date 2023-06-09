@@ -1,7 +1,6 @@
 package scrabble;
 
-import processing.core.PGraphics;
-
+// This class represents a tile either being dragged, in the board, or in the tile rack
 public class Tile {
     private static final int[] POINT_VALUES = {
             1, // A
@@ -32,6 +31,7 @@ public class Tile {
             10 // Z
     };
 
+    // The letter on this tile
     private final char letter;
 
     // Whether this tile is incorporated onto the board or is temporarily placed down
@@ -45,6 +45,7 @@ public class Tile {
         isFinalized = true;
     }
 
+    // Get the point value of this tile's letter
     public int getValue() {
         return POINT_VALUES[letter - 'A'];
     }
