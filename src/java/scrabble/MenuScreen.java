@@ -2,8 +2,6 @@ package scrabble;
 
 import processing.core.PGraphics;
 
-import java.util.Random;
-
 import static processing.core.PConstants.*;
 
 public class MenuScreen implements Screen {
@@ -97,7 +95,7 @@ public class MenuScreen implements Screen {
     public boolean handleMessage(String type, String[] data) {
         switch(type) {
             case "random_waiting": {
-                Scrabble.changeScreen(new RandomWaitingScreen(username));
+                Scrabble.changeScreen(new WaitingScreen(username));
                 return true;
             }
             case "random_game_start": {

@@ -4,10 +4,10 @@ import processing.core.PGraphics;
 
 import static processing.core.PConstants.CENTER;
 
-public class RandomWaitingScreen implements Screen {
+public class WaitingScreen implements Screen {
     private final String username;
 
-    public RandomWaitingScreen(String username) {
+    public WaitingScreen(String username) {
         this.username = username;
     }
 
@@ -52,7 +52,7 @@ public class RandomWaitingScreen implements Screen {
         float mouseY = Scrabble.getWindow().mouseY;
 
         if(mouseX > screenCenter - 80 && mouseX < screenCenter + 80 && mouseY > 300 && mouseY < 380) {
-            Scrabble.sendMessage("random_cancel");
+            Scrabble.sendMessage("waiting_cancel");
             Scrabble.changeScreen(new MenuScreen());
         }
     }

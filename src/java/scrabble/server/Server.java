@@ -180,7 +180,7 @@ public class Server {
                 if(randomWaiting == null) {
                     randomWaiting = client;
                     clients.get(randomWaiting).state = ClientState.IN_GAME;
-                    res = "random_waiting";
+                    res = "waiting";
                     System.out.println("New client waiting for random game");
                 } else {
                     String id = generateGameID();
@@ -189,13 +189,13 @@ public class Server {
                     clients.get(randomWaiting).gameID = id;
                     clients.get(client).gameID = id;
                     // random_game_start:{username}:{tiles}:{their_turn}
-                    send(randomWaiting, "random_game_start:" + info.username + ":" + gameInfo.getTileMessage(7) + ":true");
-                    res = "random_game_start:" + clients.get(randomWaiting).username + ":" + gameInfo.getTileMessage(7) + ":false";
+                    send(randomWaiting, "game_start:" + info.username + ":" + gameInfo.getTileMessage(7) + ":true");
+                    res = "game_start:" + clients.get(randomWaiting).username + ":" + gameInfo.getTileMessage(7) + ":false";
                 }
                 break;
             }
 
-            case "random_cancel": {
+            case "waiting_cancel": {
                 if(client.equals(randomWaiting)) {
                     randomWaiting = null;
                     clients.get(client).state = ClientState.CONNECTED;
