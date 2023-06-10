@@ -180,12 +180,12 @@ public class Board {
 
     private int[] extendWord(boolean horizontal, int start, int end, int rc) {
         // note: rc means row/column. it's just the other value needed to access the 2d array
-        if (!horizontal) {
-            while (start > 0 && tiles[start - 1][rc] != null) start -= 1;
-            while (end < SIZE - 1 && tiles[end + 1][rc] != null) end += 1;
-        } else {
+        if (horizontal) {
             while (start > 0 && tiles[rc][start - 1] != null) start -= 1;
             while (end < SIZE - 1 && tiles[rc][end + 1] != null) end += 1;
+        } else {
+            while (start > 0 && tiles[start - 1][rc] != null) start -= 1;
+            while (end < SIZE - 1 && tiles[end + 1][rc] != null) end += 1;
         }
 
         return new int[]{start, end};
@@ -206,11 +206,12 @@ public class Board {
 
     public WordPlacementInfo validateSubWord(boolean horizontal, int start, int end, int rc) {
         StringBuilder builder = new StringBuilder();
-        Tile tile = tiles[0][0];
+        Tile tile;
         int wordMultiplier = 1;
         int pts = 0;
         if (horizontal) {
             for (int c = start; c <= end; c++) {
+                tile = tiles[rc][c];
                 int[] multis = getMultipliers(tile, multipliers[rc][c]);
                 wordMultiplier *= multis[1];
                 pts += tile.getValue() * multis[0];
@@ -218,6 +219,7 @@ public class Board {
             }
         } else {
             for (int r = start; r <= end; r++) {
+                tile = tiles[r][rc];
                 int[] multis = getMultipliers(tile, multipliers[r][rc]);
                 wordMultiplier *= multis[1];
                 pts += tile.getValue() * multis[0];
@@ -229,9 +231,10 @@ public class Board {
 
         String word = builder.toString();
         if(!Scrabble.getDictionary().contains(word)) {
+            System.out.println(word + "NOT in dictionary");
             return WordPlacementInfo.invalidWord(word);
         }
-
+        System.out.println(word + " IS in the dictionary");
         ArrayList<WordPlacement> words = new ArrayList<>();
         words.add(new WordPlacement(word, pts));
         return WordPlacementInfo.valid(words);
@@ -258,55 +261,75 @@ public class Board {
         }
 
         ArrayList<WordPlacement> words = new ArrayList<>();
-        int col = lineInfo.startCol;
+        int pointValue = 0;
+        int wordMultiplier = 1;
+        StringBuilder wordBuilder = new StringBuilder();
+        int[] extendedWord;
+        Tile tile;
+
         if(lineInfo.horizontal) {
-            while(col > 0 && tiles[lineInfo.startRow][col] != null) {
-                col -= 1;
-            }
-        } else {
-            // Extend the line if there are tiles after or before the line
-            int[] extendedWord = extendWord(false, lineInfo.startRow, lineInfo.endRow, col);
-            int startRow = extendedWord[0];
-            int endRow = extendedWord[1];
-//            for (int row = startRow)
-            // System.out.println(startRow + " " + endRow + tiles[startRow][col].getLetter() + " " + tiles[endRow][col].getLetter());
+            int row = lineInfo.startRow;
+            extendedWord = extendWord(true, lineInfo.startCol, lineInfo.endCol, row);
+            int startCol = extendedWord[0];
+            int endCol = extendedWord[1];
 
-            int pointValue = 0;
-            int wordMultiplier = 1;
-            StringBuilder wordBuilder = new StringBuilder();
-            for (int row = startRow; row <= endRow; row++) {
+            for (int col = startCol; col <= endCol; col++) {
+                extendedWord = extendWord(false, lineInfo.startRow, lineInfo.endRow, col);
+                int startRow = extendedWord[0];
+                int endRow = extendedWord[1];
 
-                extendedWord = extendWord(true, lineInfo.startCol, lineInfo.endCol, row);
-                int sr = extendedWord[0];
-                int er = extendedWord[1];
-                if (tiles[sr][col] != null && tiles[er][col] != null) {
-                    System.out.println(startRow + " " + endRow + tiles[sr][col].getLetter() + " " + tiles[er][col].getLetter());
+                if (tiles[startRow][col] != null && tiles[endRow][col] != null && endRow - startRow >= 1) {
+                    WordPlacementInfo wpInfo = validateSubWord(false, startRow, endRow, col);
+                    if (!wpInfo.isValid) return wpInfo;
+                    else pointValue += wpInfo.words.get(0).pointValue;
                 }
-//                WordPlacementInfo wpInfo = validateSubWord(false, extendedWord[0], extendedWord[1], row);
-//                if (!wpInfo.isValid) return wpInfo;
-//                else pointValue += wpInfo.words.get(0).pointValue; // prolly not the behavior we want but oh well
 
-                Tile tile = tiles[row][col];
+                tile = tiles[row][col];
                 int[] multis = getMultipliers(tile, multipliers[row][col]);
                 wordMultiplier *= multis[1];
                 pointValue += tile.getValue() * multis[0];
                 wordBuilder.append(tile.getLetter());
             }
 
-            pointValue *= wordMultiplier;
+        } else {
+            // Extend the line if there are tiles after or before the line
+            int col = lineInfo.startCol;
+            extendedWord = extendWord(false, lineInfo.startRow, lineInfo.endRow, col);
+            int startRow = extendedWord[0];
+            int endRow = extendedWord[1];
 
-            String word = wordBuilder.toString();
-            System.out.println("word: " + word);
-            if(!Scrabble.getDictionary().contains(word)) {
-                return WordPlacementInfo.invalidWord(word);
+            for (int row = startRow; row <= endRow; row++) {
+
+                extendedWord = extendWord(true, lineInfo.startCol, lineInfo.endCol, row);
+                int sc = extendedWord[0];
+                int ec = extendedWord[1];
+                if (tiles[row][sc] != null && tiles[row][ec] != null && ec - sc >= 1) {
+                    WordPlacementInfo wpInfo = validateSubWord(true, sc, ec, row);
+                    if (!wpInfo.isValid) return wpInfo;
+                    else pointValue += wpInfo.words.get(0).pointValue;
+                }
+
+                tile = tiles[row][col];
+                int[] multis = getMultipliers(tile, multipliers[row][col]);
+                wordMultiplier *= multis[1];
+                pointValue += tile.getValue() * multis[0];
+                wordBuilder.append(tile.getLetter());
             }
-
-            words.add(new WordPlacement(word, pointValue));
         }
+
+        pointValue *= wordMultiplier;
+
+        String word = wordBuilder.toString();
+        System.out.println("word: " + word);
+        if(!Scrabble.getDictionary().contains(word)) {
+            return WordPlacementInfo.invalidWord(word);
+        }
+
+        words.add(new WordPlacement(word, pointValue));
 
         System.out.println(lineInfo.horizontal + " " + lineInfo.startRow + " " + lineInfo.startCol + " " + lineInfo.endRow + " " + lineInfo.endCol);
 
-        words.sort(Comparator.comparingInt(word -> word.pointValue));
+        words.sort(Comparator.comparingInt(w -> w.pointValue));
         wordPlacement = WordPlacementInfo.valid(words);
         boardChanged = false;
 
