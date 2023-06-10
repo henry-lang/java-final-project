@@ -159,6 +159,10 @@ public class GameScreen implements Screen {
                 return true;
             }
 
+            case "opponent_left": {
+                Scrabble.changeScreen(new GameEndScreen(true, true, thisScore, opponentScore));
+            }
+
             default: {
                 return false;
             }
