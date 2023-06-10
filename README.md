@@ -8,6 +8,8 @@ Code for our Java class's final project.
 
 Similar to Words with Friends, an online Scrabble-inspired game.
 
+[Demo video](https://youtu.be/m3QJrVPxIQA)
+
 # INFORMATION ON HOW TO RUN THE PROGRAM
 
 Our canvas submission contains two .jar files with the IntelliJ compiled code bundled into a .jar package will all libraries and resources (the dictionary) embedded.
