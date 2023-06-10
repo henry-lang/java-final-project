@@ -57,13 +57,14 @@ public class GameScreen implements Screen {
         graphics.fill(255);
         graphics.textAlign(CENTER);
         graphics.textSize(20);
-        if(board.checkWordPlacement().isValid) {
+        WordPlacementInfo wpInfo = board.checkWordPlacement();
+        if(wpInfo.isValid) {
             if(thisTurn) {
                 graphics.rect(screenCenter - 80, boardEnd + 5, 160, 35, 25);
                 graphics.fill(0);
-                graphics.text("PLAY - ", screenCenter, boardEnd + 40 * 0.7f);
+                graphics.text("PLAY  for " + wpInfo.points + " points", screenCenter, boardEnd + 40 * 0.7f);
             } else {
-                // TODO: say how many points it WOULD be worth
+                graphics.text(wpInfo.points + " points", screenCenter, boardEnd + 40 * 0.7f);
             }
         } else {
             graphics.text(board.checkWordPlacement().invalidReason, screenCenter, boardEnd + 30);
