@@ -1,4 +1,6 @@
-# Scrabble
+# Phrases with Phriends
+![The main menu](./photos/main_menu.png)
+![The game](./photos/game.png)
 
 Code for our Java class's final project.
 
