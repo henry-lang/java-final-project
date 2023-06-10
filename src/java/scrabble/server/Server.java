@@ -97,7 +97,20 @@ public class Server {
                             if(clientChannel.equals(randomWaiting)) {
                                 randomWaiting = null;
                             }
+                            if(clients.containsKey(clientChannel)) {
+                                ClientInfo info = clients.get(clientChannel);
+                                if(info.state == ClientState.IN_GAME) {
+                                    GameInfo gameInfo = games.get(info.gameID);
+                                    SocketChannel opponent = gameInfo.getOpponent(clientChannel);
+                                    ClientInfo opponentInfo = clients.get(opponent);
+                                    opponentInfo.gameID = "";
+                                    opponentInfo.state = ClientState.CONNECTED;
+                                    games.remove(info.gameID);
+                                    send(opponent, "opponent_left");
+                                }
+                            }
                             key.cancel();
+                            clients.remove(clientChannel);
                         }
                     }
 
@@ -186,10 +199,16 @@ public class Server {
                 ClientInfo info = clients.get(client);
                 if (!info.state.equals(ClientState.IN_GAME)) res = "leave_fail:not in active game";
                 else {
-                    games.get(info.gameID).removePlayer();
+                    GameInfo gameInfo = games.get(info.gameID);
+                    SocketChannel opponent = gameInfo.getOpponent(client);
+                    ClientInfo opponentInfo = clients.get(opponent);
+                    gameInfo.removePlayer();
+                    opponentInfo.gameID = "";
+                    opponentInfo.state = ClientState.CONNECTED;
                     info.gameID = "";
                     info.state = ClientState.CONNECTED;
-                    res = "leave_success";
+                    games.remove(info.gameID);
+                    send(opponent, "opponent_left");
                 }
                 break;
             }
