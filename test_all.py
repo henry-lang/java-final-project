@@ -1,8 +1,8 @@
 import subprocess
 from time import sleep
 
-client = 'java -jar ./out/artifacts/phrases_client/phrases_client.jar'
-server = 'java -jar ./out/artifacts/phrases_server/phrases_server.jar'
+client = 'java -jar ./out/artifacts/phrases_client/phrases_client.jar'.split()
+server = 'java -jar ./out/artifacts/phrases_server/phrases_server.jar'.split()
 
 server_p = subprocess.Popen(server)
 sleep(0.5)

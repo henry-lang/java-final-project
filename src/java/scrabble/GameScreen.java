@@ -67,7 +67,7 @@ public class GameScreen implements Screen {
                 graphics.text(wpInfo.points + " points", screenCenter, boardEnd + 40 * 0.7f);
             }
         } else {
-            graphics.text(board.checkWordPlacement().invalidReason, screenCenter, boardEnd + 30);
+            graphics.text(wpInfo.invalidReason, screenCenter, boardEnd + 30);
         }
         float x = Scrabble.getWindow().mouseX - TILE_SIZE / 2;
         float y = Scrabble.getWindow().mouseY - TILE_SIZE / 2;

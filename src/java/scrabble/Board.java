@@ -3,7 +3,6 @@ package scrabble;
 import processing.core.PGraphics;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import static scrabble.Multiplier.*;
 
 public class Board {
@@ -287,8 +286,10 @@ public class Board {
             extendedWord = extendWord(true, col, col, row);
             if (extendedWord[0] != extendedWord[1]) {
                 WordPlacementInfo wpInfo = validateSubWord(true, extendedWord[0], extendedWord[1], row);
-                System.out.println("horizontal: does not equal: " + extendedWord[0] + " " + extendedWord[1]);
-                if (!wpInfo.isValid) return wpInfo;
+                if (!wpInfo.isValid) {
+                    wordPlacement = wpInfo;
+                    return wordPlacement;
+                }
                 pointValue += wpInfo.words.get(0).pointValue;
                 wordBuilder.append(wpInfo.words.get(0).word);
             } else {
@@ -296,11 +297,15 @@ public class Board {
                 if (extendedWord[0] != extendedWord[1]) {
                     WordPlacementInfo wpInfo = validateSubWord(false, extendedWord[0], extendedWord[1], col);
                     System.out.println("vertical: does not equal: " + extendedWord[0] + " " + extendedWord[1]);
-                    if (!wpInfo.isValid) return wpInfo;
+                    if (!wpInfo.isValid) {
+                        wordPlacement = wpInfo;
+                        return wordPlacement;
+                    }
                     pointValue += wpInfo.words.get(0).pointValue;
                     wordBuilder.append(wpInfo.words.get(0).word);
                 } else {
-                    return WordPlacementInfo.invalidWord(String.valueOf(tiles[row][col].getLetter()));
+                    wordPlacement = WordPlacementInfo.invalidWord(String.valueOf(tiles[row][col].getLetter()));
+                    return wordPlacement;
                 }
             }
         } else {
@@ -315,9 +320,12 @@ public class Board {
                     int startRow = extendedWord[0];
                     int endRow = extendedWord[1];
 
-                    if (tiles[startRow][col] != null && tiles[endRow][col] != null && endRow - startRow >= 1) {
+                    if (tiles[startRow][col] != null && tiles[endRow][col] != null && endRow - startRow >= 1 && !tiles[row][col].isFinalized()) {
                         WordPlacementInfo wpInfo = validateSubWord(false, startRow, endRow, col);
-                        if (!wpInfo.isValid) return wpInfo;
+                        if (!wpInfo.isValid) {
+                            wordPlacement = wpInfo;
+                            return wordPlacement;
+                        }
                         else pointValue += wpInfo.words.get(0).pointValue;
                     }
 
@@ -336,11 +344,10 @@ public class Board {
                 int endRow = extendedWord[1];
 
                 for (int row = startRow; row <= endRow; row++) {
-
                     extendedWord = extendWord(true, lineInfo.startCol, lineInfo.endCol, row);
                     int sc = extendedWord[0];
                     int ec = extendedWord[1];
-                    if (tiles[row][sc] != null && tiles[row][ec] != null && ec - sc >= 1) {
+                    if (tiles[row][sc] != null && tiles[row][ec] != null && ec - sc >= 1 && !tiles[row][col].isFinalized()) {
                         WordPlacementInfo wpInfo = validateSubWord(true, sc, ec, row);
                         if (!wpInfo.isValid) {
                             wordPlacement = wpInfo;
@@ -371,9 +378,7 @@ public class Board {
 
         System.out.println(lineInfo.horizontal + " " + lineInfo.startRow + " " + lineInfo.startCol + " " + lineInfo.endRow + " " + lineInfo.endCol);
 
-        words.sort(Comparator.comparingInt(w -> w.pointValue));
         wordPlacement = WordPlacementInfo.valid(words);
-
         return wordPlacement;
     }
 
