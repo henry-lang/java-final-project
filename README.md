@@ -4,6 +4,16 @@ Code for our Java class's final project.
 
 Similar to Words with Friends, an online Scrabble-inspired game.
 
+# INFORMATION ON HOW TO RUN THE PROGRAM
+
+Our canvas submission contains two .jar files with the IntelliJ compiled code bundled into a .jar package will all libraries and resources (the dictionary) embedded. After unzipping the project zip or closing the github repository, you can run `python3 test_all.py` from the root directory of the project to fire up a server and two clients instantly. Or, you can start up a server first in one terminal window, and then clients in the other two by using the following commands.
+
+### For the client:
+`java -jar ./out/artifacts/phrases_client/phrases_client.jar`
+
+### For the server:
+`java -jar ./out/artifacts/phrases_server/phrases_server.jar`
+
 ## Implementation details
 
 ### Multiplayer communication
