@@ -167,11 +167,13 @@ public class Server {
                 }
                 info.username = split[1];
                 if(randomWaiting == null) {
+                    // There is no player currently waiting, so make this player the waiting player
                     randomWaiting = client;
                     clients.get(randomWaiting).state = ClientState.IN_GAME;
                     res = "random_waiting";
                     System.out.println("New client waiting for random game");
                 } else {
+                    // There is a player waiting, so start the game
                     String id = generateGameID();
                     GameInfo gameInfo = new GameInfo(id, randomWaiting, client);
                     games.put(id, gameInfo);
@@ -195,10 +197,12 @@ public class Server {
                 break;
             }
 
+            // A player left the game
             case "leave": {
                 ClientInfo info = clients.get(client);
                 if (!info.state.equals(ClientState.IN_GAME)) res = "leave_fail:not in active game";
                 else {
+                    // End the game and tell the opponent that they won
                     GameInfo gameInfo = games.get(info.gameID);
                     SocketChannel opponent = gameInfo.getOpponent(client);
                     ClientInfo opponentInfo = clients.get(opponent);
@@ -214,12 +218,14 @@ public class Server {
             }
 
             case "turn": {
+                // Make sure the player is in a game
                 ClientInfo info = clients.get(client);
                 if(info.state != ClientState.IN_GAME) {
                     res = "turn_fail:not in active game";
                     break;
                 }
 
+                // Send the turn to the other player
                 int numTiles = split.length - 2;
                 GameInfo game = games.get(info.gameID);
                 res = "turn_success:" + game.getTileMessage(numTiles);
