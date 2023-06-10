@@ -16,11 +16,11 @@ Possible requests and responses are:
   * Responses
     * `random_waiting` - successfully placed in the queue
     * `random_game_start` - complex, see below
-* `random_game_start:{opponent_username}:{tiles}:{yourTurn}` - random game has been found, and an opponent has been matched with you. *this may be sent without prior `random_waiting` message*
+* `random_game_start:{opponent_username}:{tiles}:{your_turn}` - random game has been found, and an opponent has been matched with you. *this may be sent without prior `random_waiting` message*
   * Payload
     * `opponent_username: String` - points the word is worth
     * `tiles: char[]` - initial tiles given to the player, comma seperated
-    * `yourTurn: boolean` - whether the client who recieves this message goes first
+    * `your_turn: boolean` - whether the client who recieves this message goes first
   * Sent from server
 * `random_cancel` - remove oneself from the random game queue if they are waiting
   * If the user is not in the queue, this will be ignored by the server
