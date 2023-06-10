@@ -82,6 +82,8 @@ public class GameScreen implements Screen {
             graphics.fill(0);
             graphics.textSize(TILE_SIZE * 0.7f);
             graphics.text(draggedTile.getLetter(), textX, textY);
+            graphics.textSize(TILE_SIZE * 0.4f);
+            graphics.text(draggedTile.getValue(), textX + TILE_SIZE * 0.30f, textY + TILE_SIZE * 0.20f);
         }
     }
 

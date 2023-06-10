@@ -52,11 +52,14 @@ public class TileRack {
             if(tiles[i] == null) continue;
             float x = (TILE_SIZE * i) + 60 + (TILE_GAP * i);
             float xTxt = x + (TILE_SIZE / 2.0f);
-            float yTxt = Y + 2.5f + (TILE_SIZE * 0.65f);
+            float yTxt = Y + 2.5f + (TILE_SIZE * 0.75f);
             graphics.fill(242, 173, 26);
             graphics.rect(x, Y + 2.5f, TILE_SIZE, TILE_SIZE, 10);
             graphics.fill(0);
+            graphics.textSize(TILE_SIZE * 0.7f);
             graphics.text(tiles[i].getLetter(), xTxt, yTxt);
+            graphics.textSize(TILE_SIZE * 0.4f);
+            graphics.text(tiles[i].getValue(), xTxt + TILE_SIZE * 0.30f, yTxt + TILE_SIZE * 0.20f);
         }
     }
 

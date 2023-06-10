@@ -242,22 +242,28 @@ public class Board {
 
     public WordPlacementInfo checkWordPlacement() {
         if(!boardChanged) return wordPlacement;
+        boardChanged = false;
+        System.out.println("Recalculating board");
 
         if(!anyTilesPlaced()) {
-            return WordPlacementInfo.INVALID_NO_TILES;
+            wordPlacement = WordPlacementInfo.INVALID_NO_TILES;
+            return wordPlacement;
         }
 
         TileLineInfo lineInfo = tilesInStraightLine();
         if(!lineInfo.inStraightLine) {
-            return WordPlacementInfo.INVALID_STRAIGHT_LINE;
+            wordPlacement = WordPlacementInfo.INVALID_STRAIGHT_LINE;
+            return wordPlacement;
         }
 
         if(checkForGapsInLine(lineInfo)) {
-            return WordPlacementInfo.INVALID_GAP_IN_LINE;
+            wordPlacement = WordPlacementInfo.INVALID_GAP_IN_LINE;
+            return wordPlacement;
         }
 
         if(isFirstMove() && !lineInfo.intersects(CENTER, CENTER)) {
-            return WordPlacementInfo.INVALID_CENTER_SQUARE;
+            wordPlacement = WordPlacementInfo.INVALID_CENTER_SQUARE;
+            return wordPlacement;
         }
 
         ArrayList<WordPlacement> words = new ArrayList<>();
@@ -305,7 +311,10 @@ public class Board {
                 int ec = extendedWord[1];
                 if (tiles[row][sc] != null && tiles[row][ec] != null && ec - sc >= 1) {
                     WordPlacementInfo wpInfo = validateSubWord(true, sc, ec, row);
-                    if (!wpInfo.isValid) return wpInfo;
+                    if (!wpInfo.isValid) {
+                        wordPlacement = wpInfo;
+                        return wordPlacement;
+                    }
                     else pointValue += wpInfo.words.get(0).pointValue;
                 }
 
@@ -322,7 +331,8 @@ public class Board {
         String word = wordBuilder.toString();
         System.out.println("word: " + word);
         if(!Scrabble.getDictionary().contains(word)) {
-            return WordPlacementInfo.invalidWord(word);
+            wordPlacement = WordPlacementInfo.invalidWord(word);
+            return wordPlacement;
         }
 
         words.add(new WordPlacement(word, pointValue));
@@ -331,7 +341,6 @@ public class Board {
 
         words.sort(Comparator.comparingInt(w -> w.pointValue));
         wordPlacement = WordPlacementInfo.valid(words);
-        boardChanged = false;
 
         return wordPlacement;
     }
@@ -378,6 +387,8 @@ public class Board {
             tiles[row][col] = new Tile(c);
             tiles[row][col].makeFinalized();
         }
+
+        boardChanged = true;
     }
 
     // Finalize the current turn onto the board (finish the turn board-side)
@@ -389,6 +400,7 @@ public class Board {
                 }
             }
         }
+        boardChanged = true;
     }
 
     // Render the board onto the screen
@@ -408,7 +420,6 @@ public class Board {
                 float textX = x + TILE_SIZE / 2;
                 float textY = y + TILE_SIZE * 0.7f;
 
-                graphics.textSize(TILE_SIZE * 0.7f);
                 graphics.textAlign(graphics.CENTER);
 
                 if(tile == null) {
@@ -416,46 +427,53 @@ public class Board {
                     graphics.rect(x, y, TILE_SIZE, TILE_SIZE, TILE_RADIUS);
                     if(multiplier != NONE && multiplier != ORIGIN) {
                         graphics.fill(240);
+                        graphics.textSize(TILE_SIZE * 0.7f);
                         graphics.text(multiplier.name(), textX, textY);
                     }
                 } else {
                     // Get status of neighboring cells
+                    boolean thisTile = tile.isFinalized();
                     boolean up = i > 0 && tiles[i - 1][j] != null && tiles[i - 1][j].isFinalized();
                     boolean down = i < SIZE - 1 && tiles[i + 1][j] != null && tiles[i + 1][j].isFinalized();
                     boolean left = j > 0 && tiles[i][j - 1] != null && tiles[i][j - 1].isFinalized();
                     boolean right = j < SIZE - 1 && tiles[i][j + 1] != null && tiles[i][j + 1].isFinalized();
 
-                    float tl = !up && !left ? TILE_RADIUS : 0;
-                    float tr = !up && !right ? TILE_RADIUS : 0;
-                    float bl = !down && !left ? TILE_RADIUS : 0;
-                    float br = !down && !right ? TILE_RADIUS : 0;
+                    float tl = !thisTile || (!up && !left) ? TILE_RADIUS : 0;
+                    float tr = !thisTile || (!up && !right) ? TILE_RADIUS : 0;
+                    float bl = !thisTile || (!down && !left) ? TILE_RADIUS : 0;
+                    float br = !thisTile || (!down && !right) ? TILE_RADIUS : 0;
 
                     float w = TILE_SIZE;
                     float h = TILE_SIZE;
 
-                    if(left) {
-                        x -= TILE_GAPS;
-                        w += TILE_GAPS;
-                    }
+                    if(thisTile) {
+                        if(left) {
+                            x -= TILE_GAPS;
+                            w += TILE_GAPS;
+                        }
 
-                    if(right) {
-                        w += TILE_GAPS;
-                    }
+                        if(right) {
+                            w += TILE_GAPS;
+                        }
 
-                    if(up) {
-                        y -= TILE_GAPS;
-                        h += TILE_GAPS;
-                    }
+                        if(up) {
+                            y -= TILE_GAPS;
+                            h += TILE_GAPS;
+                        }
 
-                    if(down) {
-                        h += TILE_GAPS;
+                        if(down) {
+                            h += TILE_GAPS;
+                        }
                     }
 
                     // TODO: don't hardcode this
                     graphics.fill(242, 173, 26);
                     graphics.rect(x, y, w, h, tl, tr, br, bl);
+                    graphics.textSize(TILE_SIZE * 0.7f);
                     graphics.fill(0);
                     graphics.text(tile.getLetter(), textX, textY);
+                    graphics.textSize(TILE_SIZE * 0.4f);
+                    graphics.text(tile.getValue(), textX + TILE_SIZE * 0.30f, textY + TILE_SIZE * 0.25f);
                 }
             }
         }
