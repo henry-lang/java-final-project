@@ -212,17 +212,21 @@ public class Board {
         if (horizontal) {
             for (int c = start; c <= end; c++) {
                 tile = tiles[rc][c];
-                int[] multis = getMultipliers(tile, multipliers[rc][c]);
-                wordMultiplier *= multis[1];
-                pts += tile.getValue() * multis[0];
+//                if (!tile.isFinalized()) {
+                    int[] multis = getMultipliers(tile, multipliers[rc][c]);
+                    wordMultiplier *= multis[1];
+                    pts += tile.getValue() * multis[0];
+//                }
                 builder.append(tile.getLetter());
             }
         } else {
             for (int r = start; r <= end; r++) {
                 tile = tiles[r][rc];
-                int[] multis = getMultipliers(tile, multipliers[r][rc]);
-                wordMultiplier *= multis[1];
-                pts += tile.getValue() * multis[0];
+//                if (!tile.isFinalized()) {
+                    int[] multis = getMultipliers(tile, multipliers[r][rc]);
+                    wordMultiplier *= multis[1];
+                    pts += tile.getValue() * multis[0];
+//                }
                 builder.append(tile.getLetter());
             }
         }
@@ -238,6 +242,10 @@ public class Board {
         ArrayList<WordPlacement> words = new ArrayList<>();
         words.add(new WordPlacement(word, pts));
         return WordPlacementInfo.valid(words);
+    }
+
+    public boolean singleTilePlaced(TileLineInfo lineInfo) {
+        return lineInfo.startCol == lineInfo.endCol && lineInfo.startRow == lineInfo.endRow;
     }
 
     public WordPlacementInfo checkWordPlacement() {
@@ -273,56 +281,80 @@ public class Board {
         int[] extendedWord;
         Tile tile;
 
-        if(lineInfo.horizontal) {
+        if (singleTilePlaced(lineInfo)) {
             int row = lineInfo.startRow;
-            extendedWord = extendWord(true, lineInfo.startCol, lineInfo.endCol, row);
-            int startCol = extendedWord[0];
-            int endCol = extendedWord[1];
+            int col = lineInfo.startCol;
+            extendedWord = extendWord(true, col, col, row);
+            if (extendedWord[0] != extendedWord[1]) {
+                WordPlacementInfo wpInfo = validateSubWord(true, extendedWord[0], extendedWord[1], row);
+                System.out.println("horizontal: does not equal: " + extendedWord[0] + " " + extendedWord[1]);
+                if (!wpInfo.isValid) return wpInfo;
+                pointValue += wpInfo.words.get(0).pointValue;
+                wordBuilder.append(wpInfo.words.get(0).word);
+            } else {
+                extendedWord = extendWord(false, row, row, col);
+                if (extendedWord[0] != extendedWord[1]) {
+                    WordPlacementInfo wpInfo = validateSubWord(false, extendedWord[0], extendedWord[1], col);
+                    System.out.println("vertical: does not equal: " + extendedWord[0] + " " + extendedWord[1]);
+                    if (!wpInfo.isValid) return wpInfo;
+                    pointValue += wpInfo.words.get(0).pointValue;
+                    wordBuilder.append(wpInfo.words.get(0).word);
+                } else {
+                    return WordPlacementInfo.invalidWord(String.valueOf(tiles[row][col].getLetter()));
+                }
+            }
+        } else {
+            if(lineInfo.horizontal) {
+                int row = lineInfo.startRow;
+                extendedWord = extendWord(true, lineInfo.startCol, lineInfo.endCol, row);
+                int startCol = extendedWord[0];
+                int endCol = extendedWord[1];
 
-            for (int col = startCol; col <= endCol; col++) {
+                for (int col = startCol; col <= endCol; col++) {
+                    extendedWord = extendWord(false, lineInfo.startRow, lineInfo.endRow, col);
+                    int startRow = extendedWord[0];
+                    int endRow = extendedWord[1];
+
+                    if (tiles[startRow][col] != null && tiles[endRow][col] != null && endRow - startRow >= 1) {
+                        WordPlacementInfo wpInfo = validateSubWord(false, startRow, endRow, col);
+                        if (!wpInfo.isValid) return wpInfo;
+                        else pointValue += wpInfo.words.get(0).pointValue;
+                    }
+
+                    tile = tiles[row][col];
+                    int[] multis = getMultipliers(tile, multipliers[row][col]);
+                    wordMultiplier *= multis[1];
+                    pointValue += tile.getValue() * multis[0];
+                    wordBuilder.append(tile.getLetter());
+                }
+
+            } else {
+                // Extend the line if there are tiles after or before the line
+                int col = lineInfo.startCol;
                 extendedWord = extendWord(false, lineInfo.startRow, lineInfo.endRow, col);
                 int startRow = extendedWord[0];
                 int endRow = extendedWord[1];
 
-                if (tiles[startRow][col] != null && tiles[endRow][col] != null && endRow - startRow >= 1) {
-                    WordPlacementInfo wpInfo = validateSubWord(false, startRow, endRow, col);
-                    if (!wpInfo.isValid) return wpInfo;
-                    else pointValue += wpInfo.words.get(0).pointValue;
-                }
+                for (int row = startRow; row <= endRow; row++) {
 
-                tile = tiles[row][col];
-                int[] multis = getMultipliers(tile, multipliers[row][col]);
-                wordMultiplier *= multis[1];
-                pointValue += tile.getValue() * multis[0];
-                wordBuilder.append(tile.getLetter());
-            }
-
-        } else {
-            // Extend the line if there are tiles after or before the line
-            int col = lineInfo.startCol;
-            extendedWord = extendWord(false, lineInfo.startRow, lineInfo.endRow, col);
-            int startRow = extendedWord[0];
-            int endRow = extendedWord[1];
-
-            for (int row = startRow; row <= endRow; row++) {
-
-                extendedWord = extendWord(true, lineInfo.startCol, lineInfo.endCol, row);
-                int sc = extendedWord[0];
-                int ec = extendedWord[1];
-                if (tiles[row][sc] != null && tiles[row][ec] != null && ec - sc >= 1) {
-                    WordPlacementInfo wpInfo = validateSubWord(true, sc, ec, row);
-                    if (!wpInfo.isValid) {
-                        wordPlacement = wpInfo;
-                        return wordPlacement;
+                    extendedWord = extendWord(true, lineInfo.startCol, lineInfo.endCol, row);
+                    int sc = extendedWord[0];
+                    int ec = extendedWord[1];
+                    if (tiles[row][sc] != null && tiles[row][ec] != null && ec - sc >= 1) {
+                        WordPlacementInfo wpInfo = validateSubWord(true, sc, ec, row);
+                        if (!wpInfo.isValid) {
+                            wordPlacement = wpInfo;
+                            return wordPlacement;
+                        }
+                        else pointValue += wpInfo.words.get(0).pointValue;
                     }
-                    else pointValue += wpInfo.words.get(0).pointValue;
-                }
 
-                tile = tiles[row][col];
-                int[] multis = getMultipliers(tile, multipliers[row][col]);
-                wordMultiplier *= multis[1];
-                pointValue += tile.getValue() * multis[0];
-                wordBuilder.append(tile.getLetter());
+                    tile = tiles[row][col];
+                    int[] multis = getMultipliers(tile, multipliers[row][col]);
+                    wordMultiplier *= multis[1];
+                    pointValue += tile.getValue() * multis[0];
+                    wordBuilder.append(tile.getLetter());
+                }
             }
         }
 
@@ -400,6 +432,7 @@ public class Board {
                 }
             }
         }
+
         boardChanged = true;
     }
 
