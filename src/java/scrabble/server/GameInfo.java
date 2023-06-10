@@ -30,7 +30,7 @@ public class GameInfo {
     private int players;
 
     // The tiles still in the tile bag
-    public ArrayList<Character> tileBag = new ArrayList<>();
+    public final ArrayList<Character> tileBag = new ArrayList<>();
 
     public GameInfo(String id, SocketChannel playerOne, SocketChannel playerTwo) {
         this.id = id;
@@ -47,7 +47,6 @@ public class GameInfo {
 
         // Shuffle the bag to add randomness
         Collections.shuffle(tileBag);
-        tileBag = new ArrayList<>(tileBag.subList(0, 14));
     }
 
     public GameInfo(String id) {
