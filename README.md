@@ -11,54 +11,37 @@ Similar to Words with Friends, an online Scrabble-inspired game.
 Clients and the server exchange data through a TCP socket connection.
 Possible requests and responses are:
 
-* `logon:{name}` - request to log on with a username
-  * Payload
-    * `name: String` - Name to be used in active games
-  * Responses
-    * `logon_success` - successful logon
-    * `logon_fail:{reason}` - failed to log on
-      * Payload
-        * `reason: String` - reason for logon failure
-* `create` - request to host a new game
-  * Payload: None
-  * Responses
-    * `create_success:{id}` - successfully created a new game
-      * Payload
-        * `id: String` - game ID to be used in games
-    * `create_fail:{reason}` - failed to create a new game
-      * Payload
-        * `reason: String` - reason for failure
-* `random` - request to join a random game
+* `random:{username}` - request to join a random game
   * Payload: None
   * Responses
     * `random_waiting` - successfully placed in the queue
-    * `random_game_found` - client has been matched with another - THIS MAY BE SENT INSTANTLY WITHOUT WAITING, but if client must wait for a game `random_waiting` will be sent
-    * `random_fail:{reason}` - failed adding player to queue
-* `join:{id}` - request to join a new game
+    * `random_game_start` - complex, see below
+* `random_game_start:{opponent_username}:{tiles}:{yourTurn}` - random game has been found, and an opponent has been matched with you. *this may be sent without prior `random_waiting` message*
   * Payload
-    * `id: String` - ID of game to join
-  * Responses
-    * `join_success` - **!! TODO**
-    * `join_fail:{reason}` - **!! TODO**
-* `turn:{pts}:{tiles}:{pos}` - request to submit a turn
+    * `opponent_username: String` - points the word is worth
+    * `tiles: char[]` - initial tiles given to the player, comma seperated
+    * `yourTurn: boolean` - whether the client who recieves this message goes first
+  * Sent from server
+* `random_cancel` - remove oneself from the random game queue if they are waiting
+  * If the user is not in the queue, this will be ignored by the server
+* `turn:{pts}:{tiles}` - request to submit a turn
   * Payload
     * `pts: int` - points the word is worth
-    * `tiles: Tile[]` - new tiles added to the board
-    * `pos: int[][]` - corresponding positions of new tiles
+    * `tiles: (char, int, int)[]` - new tiles added to the board in letter, row, column format colon seperated
   * Responses
     * `turn_success:{tiles}` - turn was successfully validated
       * Payload
-        * `tiles: Tile[]` - new tiles taken from the "tile bag"
+        * `tiles: char[]` - new tiles taken from the "tile bag", comma seperated
     * `turn_fail:{reason}` - turn was not validated
       * `reason: String` - reason for invalid turn
+* `opponent_turn:{pts}:{tiles}` - opponent played a turn
+  * This is just an echo of the `turn` message sent by the other player. Payload is the same and there is no response that should be sent after this messaage. Clients should note that it is their turn.
+* `leave` - forfeit the current game, giving the other player the win
+  * No responses, the equivalent to this is sent when the client's connection is closed (they close the app)
+* `opponent_left` - the opponent left the game
+  * This is sent when the other player sends a `leave` message. No response.
 
-Server messages that are not in response to requests are:
 
-* `game_start` - broadcast to exit queue and begin game
-* `game_end:{winner}`- broadcast to end game
-  * Payload
-    * `winner: String` - name of winning player
-
-If the client sent the server a malformed request (e.g. `jion` instead of `join`)
+If the client sent the server a malformed request (e.g. `radnom` instead of `random`)
 or a request not in this documentation (e.g. `abc123`),
 the server will respond with `msg_fail:unkown request`.
