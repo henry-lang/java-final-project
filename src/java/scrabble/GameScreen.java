@@ -34,6 +34,10 @@ public class GameScreen implements Screen {
     // The tile that the player is currently dragging
     private static Tile draggedTile = null;
 
+    // If the last turn of the game has been played, this will represent System.nanoTime()
+    // So that we can wait 5 seconds before changing screen to the GameEndScreen
+    private long lastTurnNano = 0;
+
 
     public GameScreen(String thisUsername, String opponentUsername, Tile[] tiles, boolean thisTurn) {
         this.thisUsername = thisUsername;
@@ -84,6 +88,13 @@ public class GameScreen implements Screen {
             graphics.text(draggedTile.getLetter(), textX, textY);
             graphics.textSize(TILE_SIZE * 0.4f);
             graphics.text(draggedTile.getValue(), textX + TILE_SIZE * 0.30f, textY + TILE_SIZE * 0.20f);
+        }
+
+        // If the last turn has been played, check if it's been 5 seconds and if so change
+        // screen to the game end screen
+        // 5000000000L is 5 seconds
+        if(lastTurnNano != 0 && System.nanoTime() - lastTurnNano > 5000000000L) {
+            Scrabble.changeScreen(new GameEndScreen(thisScore >= opponentScore, false, thisScore, opponentScore));
         }
     }
 
@@ -136,9 +147,13 @@ public class GameScreen implements Screen {
                 thisTurn = false;
                 thisScore += board.checkWordPlacement().points;
                 board.finalizeTurn();
-                Tile[] newTiles = Parsing.parseTiles(data[0]);
+                boolean lastTurn = Boolean.parseBoolean(data[0]);
+                Tile[] newTiles = Parsing.parseTiles(data[1]);
                 for(Tile tile : newTiles) {
                     rack.add(tile);
+                }
+                if(lastTurn) {
+                    lastTurnNano = System.nanoTime();
                 }
                 return true;
             }
@@ -156,14 +171,20 @@ public class GameScreen implements Screen {
                 thisTurn = true;
                 // Get the amount of points it was worth and add it to the score
                 int points = Integer.parseInt(data[0]);
+                boolean lastTurn = Boolean.parseBoolean(data[1]);
                 opponentScore += points;
                 // Give the board the tiles and have it add them
                 board.applyOpponentTurn(data, rack);
+
+                if(lastTurn) {
+                    lastTurnNano = System.nanoTime();
+                }
                 return true;
             }
 
             case "opponent_left": {
                 Scrabble.changeScreen(new GameEndScreen(true, true, thisScore, opponentScore));
+                return true;
             }
 
             default: {
@@ -218,11 +239,11 @@ public class GameScreen implements Screen {
             draggedTile = null;
         } else if(thisTurn && board.checkWordPlacement().isValid && mouseX > screenCenter - 80 && mouseX < screenCenter + 80 && mouseY > boardEnd + 5 && mouseY < boardEnd + 40) {
             // If the user clicks the "PLAY" button, send the turn to the server
-            Scrabble.sendMessage(board.getTurnMessage());
+            Scrabble.sendMessage(board.getTurnMessage(rack));
         } else if(mouseX > 60 && mouseX < 130 && mouseY > TileRack.Y - 30 && mouseY < TileRack.Y - 5) {
             // User clicked shuffle button
             rack.shuffle();
-        } else if(mouseX > screenCenter - 35 && mouseX < screenCenter + 35 && mouseY > 10 && mouseY < 35) {
+        } else if(lastTurnNano == 0 && mouseX > screenCenter - 35 && mouseX < screenCenter + 35 && mouseY > 10 && mouseY < 35) {
             // User clicked leave button
             Scrabble.sendMessage("leave");
             Scrabble.changeScreen(new MenuScreen());

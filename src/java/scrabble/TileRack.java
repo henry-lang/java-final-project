@@ -28,6 +28,17 @@ public class TileRack {
         }
     }
 
+    public int numTiles() {
+        int num = 0;
+        for(Tile tile : tiles) {
+            if(tile != null) {
+                num++;
+            }
+        }
+
+        return num;
+    }
+
     // Remove a tile at a given index
     public void remove(int index) {
         tiles[index] = null;

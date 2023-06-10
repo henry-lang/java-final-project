@@ -2,6 +2,9 @@ package scrabble;
 
 public abstract class Parsing {
     public static Tile[] parseTiles(String tiles) {
+        if(tiles.equals("_")) {
+            return new Tile[0];
+        }
         String[] tileStrings = tiles.split(",");
         Tile[] parsedTiles = new Tile[tileStrings.length];
 

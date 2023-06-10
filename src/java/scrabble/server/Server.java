@@ -226,12 +226,22 @@ public class Server {
                 }
 
                 // Send the turn to the other player
-                int numTiles = split.length - 2;
+                int numTiles = split.length - 3;
+                boolean rackEmpty = Boolean.parseBoolean(split[2]);
                 GameInfo game = games.get(info.gameID);
-                res = "turn_success:" + game.getTileMessage(numTiles);
-                int start = msg.indexOf(':');
-                send(game.getOpponent(client), "opponent_turn:" + msg.substring(start + 1));
-
+                SocketChannel opponent = game.getOpponent(client);
+                boolean gameOver = rackEmpty && game.tileBag.isEmpty();
+                res = "turn_success:" + gameOver + ":" + game.getTileMessage(numTiles);
+                int start = msg.indexOf(':', msg.indexOf(':', msg.indexOf(':') + 1) + 1);
+                send(opponent, "opponent_turn:" + split[1] + ":" + gameOver + ":" + msg.substring(start + 1));
+                if(gameOver) {
+                    games.remove(info.gameID);
+                    ClientInfo opponentInfo = clients.get(opponent);
+                    info.state = ClientState.CONNECTED;
+                    opponentInfo.state = ClientState.CONNECTED;
+                    info.gameID = "";
+                    opponentInfo.gameID = "";
+                }
                 break;
             }
 

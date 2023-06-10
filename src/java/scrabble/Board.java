@@ -59,7 +59,7 @@ public class Board {
 
     // Returns if this current turn is the first turn on the board - (if the center square is null)
     private boolean isFirstMove() {
-        return tiles[CENTER][CENTER] == null;
+        return tiles[CENTER][CENTER] == null || !tiles[CENTER][CENTER].isFinalized();
     }
 
     // Returns if any not finalized tiles are placed on the board
@@ -177,6 +177,26 @@ public class Board {
         return false;
     }
 
+    // Checks if at least one new tile placed is connected to an old existing tile
+    // This code runs with the precondition that there are no gaps in the line,
+    // as all tiles in the TileLineInfo will be iterated over without checking for null.
+    private boolean checkNewTilesConnected(TileLineInfo lineInfo) {
+        for(int r = lineInfo.startRow; r <= lineInfo.endRow; r++) {
+            for(int c = lineInfo.startCol; c <= lineInfo.endCol; c++) {
+                if(!tiles[r][c].isFinalized()) {
+                    boolean left = c > 0 && tiles[r][c - 1] != null && tiles[r][c - 1].isFinalized();
+                    boolean right = c < SIZE - 1 && tiles[r][c + 1] != null && tiles[r][c + 1].isFinalized();
+                    boolean up = r > 0 && tiles[r - 1][c] != null && tiles[r - 1][c].isFinalized();
+                    boolean down = r < SIZE - 1 && tiles[r + 1][c] != null && tiles[r + 1][c].isFinalized();
+                    if(left || right || up || down) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private int[] extendWord(boolean horizontal, int start, int end, int rc) {
         // note: rc means row/column. it's just the other value needed to access the 2d array
         if (horizontal) {
@@ -268,9 +288,16 @@ public class Board {
             return wordPlacement;
         }
 
-        if(isFirstMove() && !lineInfo.intersects(CENTER, CENTER)) {
-            wordPlacement = WordPlacementInfo.INVALID_CENTER_SQUARE;
-            return wordPlacement;
+        if(isFirstMove()) {
+            if(!lineInfo.intersects(CENTER, CENTER)) {
+                wordPlacement = WordPlacementInfo.INVALID_CENTER_SQUARE;
+                return wordPlacement;
+            }
+        } else {
+            if(!checkNewTilesConnected(lineInfo)) {
+                wordPlacement = WordPlacementInfo.INVALID_TOUCH_EXISTING;
+                return wordPlacement;
+            }
         }
 
         ArrayList<WordPlacement> words = new ArrayList<>();
@@ -383,10 +410,14 @@ public class Board {
     }
 
     // Get the turn message to send to the server, which just includes all the tiles added to the board in letter, row, column format
-    public String getTurnMessage() {
+    // We need the TileRack because we need to send if it is empty so the server can check
+    // If it is the last move (if the tile bag is empty)
+    public String getTurnMessage(TileRack rack) {
         StringBuilder msg = new StringBuilder();
         msg.append("turn:");
         msg.append(wordPlacement.points);
+        msg.append(':');
+        msg.append(rack.numTiles() == 0);
         for(int r = 0; r < SIZE; r++) {
             for(int c = 0; c < SIZE; c++) {
                 if(tiles[r][c] != null && !tiles[r][c].isFinalized()) {
@@ -405,7 +436,7 @@ public class Board {
 
     // Apply the opponent's server turn message to the board
     public void applyOpponentTurn(String[] data, TileRack rack) {
-        // Remove all uninitialized tiles from the board so they don't get overwritten
+        // Remove all uninitialized tiles from the board, so they don't get overwritten
         for(int r = 0; r < SIZE; r++) {
             for(int c = 0; c < SIZE; c++) {
                 if(tiles[r][c] != null && !tiles[r][c].isFinalized()) {
@@ -416,7 +447,8 @@ public class Board {
         }
 
         // Add opponent's new tiles
-        for(int i = 1; i < data.length; i++) {
+        // Start i at 2 to skip the point value and whether it was the last turn
+        for(int i = 2; i < data.length; i++) {
             String[] attrs = data[i].split(",");
             char c = attrs[0].charAt(0);
             int row = Integer.parseInt(attrs[1]);

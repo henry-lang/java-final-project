@@ -34,7 +34,7 @@ class TileLineInfo {
     // If the line intersects a board space
     public boolean intersects(int row, int col) {
         return horizontal
-                ? (row == 0 && col >= startCol && col <= endCol)
-                : (col == 0 && row >= startRow && row <= endRow);
+                ? (row == startRow && col >= startCol && col <= endCol)
+                : (col == startCol && row >= startRow && row <= endRow);
     }
 }

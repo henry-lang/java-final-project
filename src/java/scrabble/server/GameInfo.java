@@ -30,7 +30,7 @@ public class GameInfo {
     private int players;
 
     // The tiles still in the tile bag
-    private final ArrayList<Character> tileBag = new ArrayList<>();
+    public ArrayList<Character> tileBag = new ArrayList<>();
 
     public GameInfo(String id, SocketChannel playerOne, SocketChannel playerTwo) {
         this.id = id;
@@ -47,6 +47,7 @@ public class GameInfo {
 
         // Shuffle the bag to add randomness
         Collections.shuffle(tileBag);
+        tileBag = new ArrayList<>(tileBag.subList(0, 14));
     }
 
     public GameInfo(String id) {
@@ -72,17 +73,21 @@ public class GameInfo {
 
     // Get message to send to the client with new tiles from the bag
     public String getTileMessage(int maxTiles) {
-        StringBuilder msg = new StringBuilder();
-        int given = 0;
-        while(given < maxTiles && tileBag.size() > 0) {
-            msg.append(getTile());
-            if(given < maxTiles - 1) {
-                msg.append(',');
+        if(tileBag.size() == 0) {
+            return "_";
+        } else {
+            StringBuilder msg = new StringBuilder();
+            int given = 0;
+            while(given < maxTiles && tileBag.size() > 0) {
+                msg.append(getTile());
+                if(given < maxTiles - 1) {
+                    msg.append(',');
+                }
+                given++;
             }
-            given++;
-        }
 
-        return msg.toString();
+            return msg.toString();
+        }
     }
 
     // Get the opponent of a certain player in the game
