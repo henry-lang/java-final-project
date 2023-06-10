@@ -1,6 +1,8 @@
 # Phrases with Phriends
-![The main menu](./photos/main_menu.png)
-![The game](./photos/game.png)
+<div>
+<img src="./photos/main_menu.png" alt="The main menu" width="300">
+<img src="./photos/game.png" alt="The game" width="300">
+</div>
 
 Code for our Java class's final project.
 
