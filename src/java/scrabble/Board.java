@@ -335,7 +335,18 @@ public class Board {
     }
 
     // Apply the opponent's server turn message to the board
-    public void applyOpponentTurn(String[] data) {
+    public void applyOpponentTurn(String[] data, TileRack rack) {
+        // Remove all uninitialized tiles from the board so they don't get overwritten
+        for(int r = 0; r < SIZE; r++) {
+            for(int c = 0; c < SIZE; c++) {
+                if(tiles[r][c] != null && !tiles[r][c].isFinalized()) {
+                    rack.add(tiles[r][c]);
+                    tiles[r][c] = null;
+                }
+            }
+        }
+
+        // Add opponent's new tiles
         for(int i = 1; i < data.length; i++) {
             String[] attrs = data[i].split(",");
             char c = attrs[0].charAt(0);

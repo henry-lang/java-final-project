@@ -155,7 +155,7 @@ public class GameScreen implements Screen {
                 int points = Integer.parseInt(data[0]);
                 opponentScore += points;
                 // Give the board the tiles and have it add them
-                board.applyOpponentTurn(data);
+                board.applyOpponentTurn(data, rack);
                 return true;
             }
 
