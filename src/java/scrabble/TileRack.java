@@ -4,13 +4,13 @@ import processing.core.PGraphics;
 
 public class TileRack {
     // The size in pixels of each tile in the rack
-    private final float TILE_SIZE = 45;
+    private static final float TILE_SIZE = 45;
 
     // The gap in pixels between tiles on the rack
-    private final float TILE_GAP = 10;
+    private static final float TILE_GAP = 10;
 
     // The Y coordinate start of the rack
-    private final float Y = Scrabble.WINDOW_HEIGHT - TILE_SIZE - TILE_GAP;
+    public static final float Y = Scrabble.WINDOW_HEIGHT - TILE_SIZE - TILE_GAP;
 
     // The actual list of tiles
     private final Tile[] tiles;

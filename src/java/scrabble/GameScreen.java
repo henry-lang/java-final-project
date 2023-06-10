@@ -23,10 +23,10 @@ public class GameScreen implements Screen {
     private int opponentScore = 0;
 
     // This player's username
-    private String thisUsername;
+    private final String thisUsername;
 
     // The opponent's username
-    private String opponentUsername;
+    private final String opponentUsername;
 
     // The tile rack at the bottom of the screen
     private final TileRack rack;
@@ -53,8 +53,10 @@ public class GameScreen implements Screen {
         // Draw the rack
         rack.draw(graphics);
         drawScores(graphics);
+        drawButtons(graphics);
         graphics.fill(255);
         graphics.textAlign(CENTER);
+        graphics.textSize(20);
         if(board.checkWordPlacement().isValid) {
             if(thisTurn) {
                 graphics.rect(screenCenter - 80, boardEnd + 5, 160, 35, 25);
@@ -101,6 +103,27 @@ public class GameScreen implements Screen {
         graphics.text(opponentScore, Scrabble.WINDOW_WIDTH - SCORES_PADDING, Board.Y - 5);
     }
 
+    private void drawButtons(PGraphics graphics) {
+        float screenCenter = Scrabble.WINDOW_WIDTH / 2.0f;
+
+        graphics.textAlign(CENTER);
+        graphics.textSize(15);
+
+        // Draw the leave button
+        graphics.fill(255);
+        graphics.stroke(0);
+        graphics.rect(screenCenter - 35, 10, 70, 25, 10);
+        graphics.fill(0);
+        graphics.text("LEAVE", screenCenter, 10 + 25 * 0.7f);
+
+        // Draw the shuffle button
+        graphics.fill(255);
+        graphics.stroke(0);
+        graphics.rect(60, TileRack.Y - 30, 70, 25, 10);
+        graphics.fill(0);
+        graphics.text("SHUFFLE", 95, TileRack.Y - 30 + 25 * 0.7f);
+    }
+
     @Override
     public boolean handleMessage(String type, String[] data) {
         switch(type) {
@@ -142,7 +165,6 @@ public class GameScreen implements Screen {
         }
     }
 
-    //
     @Override
     public void mousePressed(int mouseButton) {
         if(mouseButton != LEFT) return;
@@ -190,6 +212,13 @@ public class GameScreen implements Screen {
         } else if(thisTurn && board.checkWordPlacement().isValid && mouseX > screenCenter - 80 && mouseX < screenCenter + 80 && mouseY > boardEnd + 5 && mouseY < boardEnd + 40) {
             // If the user clicks the "PLAY" button, send the turn to the server
             Scrabble.sendMessage(board.getTurnMessage());
+        } else if(mouseX > 60 && mouseX < 130 && mouseY > TileRack.Y - 30 && mouseY < TileRack.Y - 5) {
+            // User clicked shuffle button
+            rack.shuffle();
+        } else if(mouseX > screenCenter - 35 && mouseX < screenCenter + 35 && mouseY > 10 && mouseY < 35) {
+            // User clicked leave button
+            Scrabble.sendMessage("leave");
+            Scrabble.changeScreen(new MenuScreen());
         }
     }
 }

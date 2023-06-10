@@ -9,6 +9,11 @@ public class MenuScreen implements Screen {
     private String errorMessage = "";
     private boolean editingUsername = false;
 
+    private static final float screenCenter = Scrabble.WINDOW_WIDTH / 2.0f;
+    private static final float dieX = screenCenter - 75;
+    private static final float dieY = 350;
+    private static final float dieSideLength = screenCenter - 100;
+
     @Override
     public void onFrame(PGraphics graphics) {
         float screenCenter = Scrabble.WINDOW_WIDTH / 2.0f;
@@ -39,18 +44,18 @@ public class MenuScreen implements Screen {
 
         // Draw the die icon
         graphics.stroke(0); // Set outline color to black
-        graphics.rect(50, 350, screenCenter - 100, screenCenter - 100, 20);
+        graphics.rect(dieX, dieY, dieSideLength, dieSideLength, 20);
 
         // Draw dots to represent "5" on the die side without an outline
         graphics.fill(0);  // Set dot color to black
         graphics.noStroke(); // Disable dot outline
 
         float dotSize = 20;  // Size of each dot
-        float dotSpacing = (screenCenter - 100) / 4.0f;  // Spacing between dots
+        float dotSpacing = (dieSideLength) / 4.0f;  // Spacing between dots
 
         // Calculate the positions of the dots
-        float dotX = 50 + dotSpacing;
-        float dotY = 350 + dotSpacing;
+        float dotX = dieX + dotSpacing;
+        float dotY = dieY + dotSpacing;
 
         // Draw the dots
         graphics.ellipse(dotX, dotY, dotSize, dotSize);  // Top-left dot
@@ -90,10 +95,9 @@ public class MenuScreen implements Screen {
 
         float mouseX = Scrabble.getWindow().mouseX;
         float mouseY = Scrabble.getWindow().mouseY;
-        float screenCenter = Scrabble.WINDOW_WIDTH / 2.0f;
-        if(mouseX >= screenCenter - 100 && mouseX <= screenCenter + 100 && mouseY >= 100 && mouseY <= 140) {
+        if(mouseX >= dieSideLength && mouseX <= screenCenter + 100 && mouseY >= 100 && mouseY <= 140) {
             editingUsername = true;
-        } else if(mouseX >= 50 && mouseX <= screenCenter - 50 && mouseY >= 350 && mouseY <= 250 + screenCenter) {
+        } else if(mouseX >= dieX && mouseX <= dieX + dieSideLength && mouseY >= dieY && mouseY <= dieY + dieSideLength) {
             if(username.isEmpty()) {
                 errorMessage = "Error: No username";
             } else {
