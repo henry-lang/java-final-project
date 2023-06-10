@@ -308,34 +308,55 @@ public class Board {
         Tile tile;
 
         if (singleTilePlaced(lineInfo)) {
+            boolean invalidHorizontal = false;
             int row = lineInfo.startRow;
             int col = lineInfo.startCol;
             extendedWord = extendWord(true, col, col, row);
             if (extendedWord[0] != extendedWord[1]) {
                 WordPlacementInfo wpInfo = validateSubWord(true, extendedWord[0], extendedWord[1], row);
                 if (!wpInfo.isValid) {
+                    System.out.println("NOT VALID HORIZONTAL");
                     wordPlacement = wpInfo;
-                    return wordPlacement;
+//                    return wordPlacement;
+                    invalidHorizontal = true;
+                } else {
+                    System.out.println("horizontal wpInfo is : " + wpInfo.isValid + " " + wpInfo.words.toString());
+                    pointValue += wpInfo.words.get(0).pointValue;
+                    wordBuilder.append(wpInfo.words.get(0).word);
                 }
-                pointValue += wpInfo.words.get(0).pointValue;
-                wordBuilder.append(wpInfo.words.get(0).word);
-            } else {
-                extendedWord = extendWord(false, row, row, col);
-                if (extendedWord[0] != extendedWord[1]) {
-                    WordPlacementInfo wpInfo = validateSubWord(false, extendedWord[0], extendedWord[1], col);
-                    System.out.println("vertical: does not equal: " + extendedWord[0] + " " + extendedWord[1]);
-                    if (!wpInfo.isValid) {
+            } else invalidHorizontal = true;
+
+            extendedWord = extendWord(false, row, row, col);
+            if (extendedWord[0] != extendedWord[1]) {
+                WordPlacementInfo wpInfo = validateSubWord(false, extendedWord[0], extendedWord[1], col);
+                System.out.println("vertical: does not equal: " + extendedWord[0] + " " + extendedWord[1]);
+                if (!wpInfo.isValid) {
+                    if (invalidHorizontal) {
+                        System.out.println("NOT VALID ANYWHERE");
                         wordPlacement = wpInfo;
                         return wordPlacement;
                     }
-                    pointValue += wpInfo.words.get(0).pointValue;
-                    wordBuilder.append(wpInfo.words.get(0).word);
+                    System.out.println("VALID HORIZONTAL BUT NOT VERTICAL");
+                    wordPlacement = wpInfo;
+                    return wordPlacement;
+
                 } else {
-                    wordPlacement = WordPlacementInfo.invalidWord(String.valueOf(tiles[row][col].getLetter()));
+                    System.out.println("VALID VERTICAL");
+                    WordPlacement word = wpInfo.words.get(0);
+                    if (pointValue < word.pointValue) {
+                        wordBuilder.delete(0, wordBuilder.length());
+                        wordBuilder.append(word.word);
+                    }
+                    pointValue += pointValue;
+                }
+            } else {
+                if (invalidHorizontal) {
+                    System.out.println("ONE LETTER VERTICAL & INVALID HORIZONTAL");
                     return wordPlacement;
                 }
             }
-        } else {
+        }
+        else {
             if(lineInfo.horizontal) {
                 int row = lineInfo.startRow;
                 extendedWord = extendWord(true, lineInfo.startCol, lineInfo.endCol, row);

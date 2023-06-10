@@ -6,6 +6,12 @@ Similar to Words with Friends, an online Scrabble-inspired game.
 
 # INFORMATION ON HOW TO RUN THE PROGRAM
 
+Our canvas submission contains two .jar files with the IntelliJ compiled code bundled into a .jar package will all libraries and resources (the dictionary) embedded.
+After unzipping the project zip or closing the GitHub repository, you can run `python3 test_all.py` from the root directory of the project to fire up a server and two clients instantly.
+Or, you can start up a server first in one terminal window, and then clients in the other two by using the following commands.
+
+Currently, the server address is hardcoded as `localhost` in the client's `Scrabble.java`, so if you would like to connect to a remote address you can change this `SERVER_HOST` constant to whatever you would like (with a recompilation afterward).
+Please remember that if you're recompiling you must use IntelliJ 
 Our canvas submission contains two .jar files with the IntelliJ compiled code bundled into a .jar package will all libraries and resources (the dictionary) embedded. After unzipping the project zip or closing the Github repository, you can run `python3 test_all.py` from the root directory of the project to fire up a server and two clients instantly. Or, you can start up a server first in one terminal window, and then clients in the other two by using the following commands. Currently, the server address is hardcoded as `localhost` in the client's `Scrabble.java`, so if you would like to connect to a remote address you can change this `SERVER_HOST` constant to whatever you would like (with a recompile afterwards).
 
 ### For the client:
